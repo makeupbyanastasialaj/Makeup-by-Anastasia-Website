@@ -1,0 +1,147 @@
+@import "tailwindcss";
+
+/*
+  Makeup by Anastasia Laj — brand system
+  Warm greige, near-black ink, crisp white. Elegant, minimal, luxe.
+  The site is intentionally light-only to match the logo.
+*/
+
+@theme {
+  /* Brand palette */
+  --color-cream: #e2dbd0; /* page background — matches the logo backdrop exactly */
+  --color-cream-50: #f1ece3; /* airy sections */
+  --color-cream-100: #ebe4d8;
+  --color-card: #fbf9f4; /* cards / surfaces */
+  --color-sand: #d9cfbc; /* hairline borders */
+  --color-sand-dark: #c7bba3;
+  --color-taupe: #a2917a; /* muted accent */
+  --color-taupe-dark: #7c6c56;
+  --color-ink: #1c1a17; /* near-black text */
+  --color-ink-soft: #55504a; /* secondary text */
+  --color-ink-faint: #8a8378;
+  --color-gold: #b18f5f; /* subtle warm accent */
+
+  /* Typography */
+  --font-sans: var(--font-montserrat), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-cormorant), ui-serif, Georgia, serif;
+  --font-script: var(--font-parisienne), cursive;
+
+  /* Rounding */
+  --radius-xl2: 1.25rem;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    background-color: var(--color-cream);
+    color: var(--color-ink);
+    /* Reference the next/font variables directly so these never depend on
+       Tailwind emitting a (possibly tree-shaken) theme token. */
+    font-family: var(--font-montserrat), ui-sans-serif, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-cormorant), ui-serif, Georgia, serif;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+  ::selection {
+    background: var(--color-taupe);
+    color: #fff;
+  }
+  /* Consistent, on-brand focus rings */
+  :focus-visible {
+    outline: 2px solid var(--color-taupe-dark);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  /* Letter-spaced small caps label, like "MAKEUP BY" in the logo */
+  .eyebrow {
+    font-family: var(--font-montserrat), ui-sans-serif, system-ui, sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.28em;
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: var(--color-taupe-dark);
+  }
+  .script {
+    font-family: var(--font-parisienne), "Segoe Script", cursive;
+    letter-spacing: 0;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 9999px;
+    padding: 0.8rem 1.6rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    border: 1px solid transparent;
+  }
+  .btn-primary {
+    background: var(--color-ink);
+    color: #fff;
+  }
+  .btn-primary:hover {
+    background: #000;
+    transform: translateY(-1px);
+  }
+  .btn-primary:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
+  }
+  .btn-outline {
+    background: transparent;
+    color: var(--color-ink);
+    border-color: var(--color-ink);
+  }
+  .btn-outline:hover {
+    background: var(--color-ink);
+    color: #fff;
+  }
+  .card {
+    background: var(--color-card);
+    border: 1px solid var(--color-sand);
+    border-radius: var(--radius-xl2);
+  }
+  .field {
+    width: 100%;
+    background: #fff;
+    border: 1px solid var(--color-sand-dark);
+    border-radius: 0.65rem;
+    padding: 0.7rem 0.85rem;
+    font-size: 0.95rem;
+    color: var(--color-ink);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .field:focus {
+    outline: none;
+    border-color: var(--color-taupe-dark);
+    box-shadow: 0 0 0 3px rgba(162, 145, 122, 0.2);
+  }
+  .field::placeholder {
+    color: var(--color-ink-faint);
+  }
+  .label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    margin-bottom: 0.35rem;
+    color: var(--color-ink-soft);
+  }
+}

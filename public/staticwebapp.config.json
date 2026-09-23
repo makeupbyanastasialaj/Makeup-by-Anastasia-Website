@@ -1,0 +1,16 @@
+{
+  "navigationFallback": {
+    "rewrite": "/404.html",
+    "exclude": [
+      "/api/*",
+      "/_next/*",
+      "/*.{css,js,png,jpg,jpeg,gif,svg,ico,webp,woff,woff2,json,txt,xml}"
+    ]
+  },
+  "responseOverrides": {
+    "404": { "rewrite": "/404.html" }
+  },
+  "platform": {
+    "apiRuntime": "node:20"
+  }
+}
