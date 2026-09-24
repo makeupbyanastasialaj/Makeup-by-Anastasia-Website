@@ -129,6 +129,15 @@ export async function getSettings(): Promise<Settings> {
     return { ...DEFAULT_SETTINGS, ...strip(e) } as Settings;
   } catch (err: unknown) {
     if ((err as { statusCode?: number })?.statusCode === 404) {
+      // The table or the singleton row is missing (e.g. deleted out-of-band).
+      // Make sure the table exists before (re)creating the row, so the app
+      // self-heals instead of returning 500s on every request.
+      try {
+        await t.createTable();
+      } catch (createErr: unknown) {
+        // 409 = table already exists or is mid-recreation; anything else is real.
+        if ((createErr as { statusCode?: number })?.statusCode !== 409) throw createErr;
+      }
       await t.createEntity({
         partitionKey: SETTINGS_PK,
         rowKey: SETTINGS_RK,
