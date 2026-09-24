@@ -8,14 +8,14 @@ import {
   verifyPassword,
   signSession,
 } from "../lib/auth";
-import { ok, badRequest, parseBody, isAdmin, sessionCookie, clearSessionCookie } from "../lib/http";
+import { ok, badRequest, parseBody, isAdmin, sessionCookie, clearSessionCookie, safe } from "../lib/http";
 
 // GET /api/admin/session — how the frontend decides where to route.
 app.http("adminSession", {
   methods: ["GET"],
   authLevel: "anonymous",
   route: "admin/session",
-  handler: async (request: HttpRequest) => {
+  handler: safe(async (request: HttpRequest) => {
     const settings = await getSettings();
     return ok({
       setupComplete: settings.setupComplete,
@@ -23,7 +23,7 @@ app.http("adminSession", {
       totpEnabled: settings.totpEnabled,
       businessName: settings.businessName,
     });
-  },
+  }),
 });
 
 // GET /api/admin/setup — issue a fresh TOTP secret + QR for first-run setup.
@@ -31,14 +31,14 @@ app.http("adminSetupInfo", {
   methods: ["GET"],
   authLevel: "anonymous",
   route: "admin/setup",
-  handler: async () => {
+  handler: safe(async () => {
     const settings = await getSettings();
     if (settings.setupComplete) return ok({ setupComplete: true });
     const secret = generateTotpSecret();
     const account = settings.contactEmail || "Anastasia Laj";
     const qr = await totpQrDataUrl(secret, account, settings.businessName);
     return ok({ setupComplete: false, secret, qr });
-  },
+  }),
 });
 
 // POST /api/admin/setup — complete first-run setup.

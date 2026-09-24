@@ -1,8 +1,25 @@
-import { HttpRequest, HttpResponseInit, Cookie } from "@azure/functions";
+import { HttpRequest, HttpResponseInit, HttpHandler, InvocationContext, Cookie } from "@azure/functions";
 import { SESSION_COOKIE, SESSION_MAX_AGE, verifySession } from "./auth";
 
 export function json(status: number, body: unknown, extra?: Partial<HttpResponseInit>): HttpResponseInit {
   return { status, jsonBody: body, ...extra };
+}
+
+/**
+ * Wrap a handler so any thrown error becomes a JSON 500 instead of an empty
+ * body. Without this, an unhandled exception surfaces to the client as a blank
+ * response, which is impossible to diagnose from the browser.
+ */
+export function safe(fn: HttpHandler): HttpHandler {
+  return async (request: HttpRequest, context: InvocationContext) => {
+    try {
+      return await fn(request, context);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      context.error("Unhandled error handling", request.method, request.url, err);
+      return json(500, { error: message });
+    }
+  };
 }
 
 export function ok(body: unknown, extra?: Partial<HttpResponseInit>): HttpResponseInit {

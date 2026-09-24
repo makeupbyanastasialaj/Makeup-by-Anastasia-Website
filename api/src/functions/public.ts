@@ -24,6 +24,38 @@ function publicSettings(s: Awaited<ReturnType<typeof getSettings>>) {
   };
 }
 
+// GET /api/diag — temporary diagnostic to find why admin endpoints fail.
+app.http("diag", {
+  methods: ["GET"],
+  authLevel: "anonymous",
+  route: "diag",
+  handler: async () => {
+    const out: Record<string, unknown> = {
+      node: process.version,
+      hasStorage: !!process.env.AZURE_STORAGE_CONNECTION_STRING,
+      hasAuthSecret: !!process.env.AUTH_SECRET,
+      authSecretLen: (process.env.AUTH_SECRET || "").length,
+    };
+    try {
+      const s = await getSettings();
+      out.setupComplete = s.setupComplete;
+      out.totpEnabled = s.totpEnabled;
+    } catch (e) {
+      out.getSettingsError = e instanceof Error ? e.message : String(e);
+    }
+    try {
+      const auth = await import("../lib/auth");
+      const secret = auth.generateTotpSecret();
+      const qr = await auth.totpQrDataUrl(secret, "test", "Makeup by Anastasia Laj");
+      out.totpOk = true;
+      out.qrLen = qr.length;
+    } catch (e) {
+      out.totpError = e instanceof Error ? e.message : String(e);
+    }
+    return ok(out);
+  },
+});
+
 // GET /api/public — everything the homepage & booking wizard need.
 app.http("publicBundle", {
   methods: ["GET"],
