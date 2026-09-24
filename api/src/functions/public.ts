@@ -52,6 +52,18 @@ app.http("diag", {
     } catch (e) {
       out.totpError = e instanceof Error ? e.message : String(e);
     }
+    // Test-load each function module to see which one fails to register.
+    const mods = ["auth", "adminBookings", "adminCatalog", "adminAvailability", "adminSettings"];
+    const modStatus: Record<string, string> = {};
+    for (const m of mods) {
+      try {
+        await import(`./${m}`);
+        modStatus[m] = "ok";
+      } catch (e) {
+        modStatus[m] = e instanceof Error ? `${e.name}: ${e.message}` : String(e);
+      }
+    }
+    out.modules = modStatus;
     return ok(out);
   },
 });
