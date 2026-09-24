@@ -18,6 +18,14 @@ type Settings = {
   maxAdvanceDays: number;
   depositType: string;
   depositValue: number;
+  logoDataUrl: string;
+  colorBackground: string;
+  colorText: string;
+  colorAccent: string;
+  heroEyebrow: string;
+  heroTitle: string;
+  heroHighlight: string;
+  heroSubtitle: string;
 };
 
 const CURRENCIES = ["GBP", "EUR", "USD", "AUD", "CAD", "NZD"];
@@ -33,11 +41,21 @@ export default function SettingsManager({ settings, stripeEnabled }: { settings:
   );
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  const [logoErr, setLogoErr] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   function set<K extends keyof Settings>(key: K, value: Settings[K]) {
     setF((prev) => ({ ...prev, [key]: value }));
     setSaved(false);
+  }
+
+  async function onLogoFile(file: File) {
+    setLogoErr(null);
+    try {
+      set("logoDataUrl", await resizeImage(file, 30000));
+    } catch {
+      setLogoErr("Couldn't use that image — please try a smaller or simpler PNG/JPG.");
+    }
   }
 
   function save() {
@@ -65,6 +83,55 @@ export default function SettingsManager({ settings, stripeEnabled }: { settings:
           <Field label="Phone"><input className="field" value={f.contactPhone} onChange={(e) => set("contactPhone", e.target.value)} /></Field>
           <Field label="Instagram handle"><input className="field" value={f.instagram} onChange={(e) => set("instagram", e.target.value)} placeholder="@yourhandle" /></Field>
           <Field label="Studio location (shown on site)"><input className="field" value={f.studioAddress} onChange={(e) => set("studioAddress", e.target.value)} placeholder="e.g. Central London" /></Field>
+        </div>
+      </section>
+
+      <section className="card p-5">
+        <h2 className="mb-1 text-xl text-ink">Branding &amp; homepage</h2>
+        <p className="mb-4 text-sm text-ink-soft">Make the site your own — your logo, colours and the words on your homepage. Changes go live as soon as you save.</p>
+
+        {/* Logo */}
+        <div className="mb-6">
+          <label className="label">Logo</label>
+          <div className="flex items-center gap-4">
+            <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-sand bg-white">
+              {f.logoDataUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={f.logoDataUrl} alt="Logo preview" className="h-full w-full object-contain" />
+              ) : (
+                <span className="px-1 text-center text-[0.65rem] text-ink-faint">No logo yet</span>
+              )}
+            </div>
+            <div className="flex flex-col gap-2">
+              <input
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                onChange={(e) => { const file = e.target.files?.[0]; if (file) onLogoFile(file); e.target.value = ""; }}
+                className="text-sm text-ink-soft file:mr-3 file:rounded-full file:border file:border-sand file:bg-cream-100 file:px-4 file:py-2 file:text-xs file:font-semibold file:uppercase file:tracking-wide file:text-ink-soft"
+              />
+              {f.logoDataUrl && (
+                <button type="button" onClick={() => set("logoDataUrl", "")} className="self-start text-xs text-red-700 underline">Remove logo</button>
+              )}
+            </div>
+          </div>
+          <p className="mt-2 text-xs text-ink-faint">Shown at the top of your homepage. It&apos;s resized automatically — a PNG with a transparent background looks best.</p>
+          {logoErr && <p className="mt-1 text-xs text-red-700">{logoErr}</p>}
+        </div>
+
+        {/* Colours */}
+        <label className="label">Colours</label>
+        <div className="mb-6 grid gap-4 sm:grid-cols-3">
+          <ColorField label="Background" value={f.colorBackground} onChange={(v) => set("colorBackground", v)} />
+          <ColorField label="Text" value={f.colorText} onChange={(v) => set("colorText", v)} />
+          <ColorField label="Accent" value={f.colorAccent} onChange={(v) => set("colorAccent", v)} />
+        </div>
+
+        {/* Homepage wording */}
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="Small heading (above the title)" full><input className="field" value={f.heroEyebrow} onChange={(e) => set("heroEyebrow", e.target.value)} /></Field>
+          <Field label="Headline"><input className="field" value={f.heroTitle} onChange={(e) => set("heroTitle", e.target.value)} /></Field>
+          <Field label="Script line (under the headline)"><input className="field" value={f.heroHighlight} onChange={(e) => set("heroHighlight", e.target.value)} /></Field>
+          <Field label="Intro paragraph" full><textarea className="field min-h-[5rem]" rows={3} value={f.heroSubtitle} onChange={(e) => set("heroSubtitle", e.target.value)} /></Field>
         </div>
       </section>
 
@@ -162,4 +229,61 @@ function Field({ label, children, full }: { label: string; children: React.React
       {children}
     </div>
   );
+}
+
+function ColorField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+  const safe = /^#[0-9a-fA-F]{6}$/.test(value) ? value : "#000000";
+  return (
+    <div>
+      <label className="label">{label}</label>
+      <div className="flex items-center gap-2">
+        <input
+          type="color"
+          value={safe}
+          onChange={(e) => onChange(e.target.value)}
+          className="h-10 w-12 shrink-0 cursor-pointer rounded border border-sand bg-white p-1"
+          aria-label={`${label} colour`}
+        />
+        <input className="field" value={value} onChange={(e) => onChange(e.target.value)} placeholder="#rrggbb" />
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Resize an image file in the browser to a small data URL that fits in Table
+ * Storage. Tries progressively smaller widths/quality until under maxChars.
+ */
+function resizeImage(file: File, maxChars: number): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error("read failed"));
+    reader.onload = () => {
+      const img = new window.Image();
+      img.onerror = () => reject(new Error("decode failed"));
+      img.onload = () => {
+        for (const w of [360, 300, 240, 180, 140]) {
+          const scale = Math.min(1, w / (img.width || w));
+          const cw = Math.max(1, Math.round((img.width || w) * scale));
+          const ch = Math.max(1, Math.round((img.height || w) * scale));
+          const canvas = document.createElement("canvas");
+          canvas.width = cw;
+          canvas.height = ch;
+          const ctx = canvas.getContext("2d");
+          if (!ctx) return reject(new Error("no canvas"));
+          ctx.clearRect(0, 0, cw, ch);
+          ctx.drawImage(img, 0, 0, cw, ch);
+          for (const q of [0.85, 0.7, 0.55]) {
+            let url = canvas.toDataURL("image/webp", q);
+            if (!url.startsWith("data:image/webp")) url = canvas.toDataURL("image/png");
+            if (url.length <= maxChars) return resolve(url);
+            if (!url.startsWith("data:image/webp")) break; // png won't shrink with quality
+          }
+        }
+        reject(new Error("too large"));
+      };
+      img.src = reader.result as string;
+    };
+    reader.readAsDataURL(file);
+  });
 }

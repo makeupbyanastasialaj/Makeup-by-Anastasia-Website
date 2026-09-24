@@ -17,6 +17,15 @@ export interface Settings {
   maxAdvanceDays: number;
   depositType: string; // FIXED | PERCENT
   depositValue: number;
+  // Branding & homepage content — editable from the manage panel
+  logoDataUrl: string; // small resized data URL, or "" to use the text wordmark
+  colorBackground: string; // hex, e.g. #e2dbd0
+  colorText: string; // hex
+  colorAccent: string; // hex
+  heroEyebrow: string;
+  heroTitle: string;
+  heroHighlight: string;
+  heroSubtitle: string;
   adminPasswordHash: string;
   totpSecret: string;
   totpEnabled: boolean;
@@ -116,6 +125,15 @@ export const DEFAULT_SETTINGS: Settings = {
   maxAdvanceDays: 90,
   depositType: "FIXED",
   depositValue: 2000,
+  logoDataUrl: "",
+  colorBackground: "#e2dbd0",
+  colorText: "#1c1a17",
+  colorAccent: "#7c6c56",
+  heroEyebrow: "Bridal & Occasion Makeup Artistry",
+  heroTitle: "Effortless elegance,",
+  heroHighlight: "beautifully you",
+  heroSubtitle:
+    "Timeless, long-wearing makeup for weddings, events and every occasion worth remembering — in my studio, or travelling to you.",
   adminPasswordHash: "",
   totpSecret: "",
   totpEnabled: false,

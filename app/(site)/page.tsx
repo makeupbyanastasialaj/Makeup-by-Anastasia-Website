@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { api, type PublicBundle } from "@/lib/api";
@@ -19,22 +18,36 @@ export default function HomePage() {
   const services = data?.services ?? [];
   const zones = data?.zones ?? [];
 
+  const s = data?.settings;
+  const businessName = s?.businessName || "Makeup by Anastasia Laj";
+  const logoUrl = s?.logoDataUrl || "/logo.png";
+  const heroEyebrow = s?.heroEyebrow || "Bridal & Occasion Makeup Artistry";
+  const heroTitle = s?.heroTitle || "Effortless elegance,";
+  const heroHighlight = s?.heroHighlight || "beautifully you";
+  const heroSubtitle =
+    s?.heroSubtitle ||
+    "Timeless, long-wearing makeup for weddings, events and every occasion worth remembering — in my studio, or travelling to you.";
+
   return (
     <>
       {/* Hero */}
       <section className="relative overflow-hidden">
         <div className="mx-auto flex max-w-4xl flex-col items-center px-4 pb-16 pt-14 text-center sm:px-6 sm:pt-20">
-          <Image src="/logo.png" alt="Makeup by Anastasia Laj" width={340} height={340} priority className="mb-2 h-auto w-56 sm:w-72" />
-          <p className="eyebrow">Bridal &amp; Occasion Makeup Artistry</p>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={logoUrl} alt={businessName} width={340} height={340} className="mb-2 h-auto w-56 object-contain sm:w-72" />
+          {heroEyebrow && <p className="eyebrow">{heroEyebrow}</p>}
           <h1 className="mt-4 text-4xl leading-tight text-ink sm:text-5xl md:text-6xl">
-            Effortless elegance,
-            <br />
-            <span className="script text-taupe-dark">beautifully you</span>
+            {heroTitle}
+            {heroHighlight && (
+              <>
+                <br />
+                <span className="script text-taupe-dark">{heroHighlight}</span>
+              </>
+            )}
           </h1>
-          <p className="mt-5 max-w-xl text-base leading-relaxed text-ink-soft">
-            Timeless, long-wearing makeup for weddings, events and every occasion worth
-            remembering — in my studio, or travelling to you.
-          </p>
+          {heroSubtitle && (
+            <p className="mt-5 max-w-xl text-base leading-relaxed text-ink-soft">{heroSubtitle}</p>
+          )}
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row">
             <Link href="/book" className="btn btn-primary">Book your appointment</Link>
             <Link href="#services" className="btn btn-outline">View services</Link>

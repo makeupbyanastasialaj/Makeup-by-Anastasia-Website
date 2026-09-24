@@ -52,6 +52,14 @@ export type PublicSettings = {
   depositValue: number;
   minNoticeHours: number;
   maxAdvanceDays: number;
+  logoDataUrl: string;
+  colorBackground: string;
+  colorText: string;
+  colorAccent: string;
+  heroEyebrow: string;
+  heroTitle: string;
+  heroHighlight: string;
+  heroSubtitle: string;
 };
 export type PublicBundle = {
   settings: PublicSettings;

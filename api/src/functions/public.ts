@@ -21,6 +21,14 @@ function publicSettings(s: Awaited<ReturnType<typeof getSettings>>) {
     depositValue: s.depositValue,
     minNoticeHours: s.minNoticeHours,
     maxAdvanceDays: s.maxAdvanceDays,
+    logoDataUrl: s.logoDataUrl,
+    colorBackground: s.colorBackground,
+    colorText: s.colorText,
+    colorAccent: s.colorAccent,
+    heroEyebrow: s.heroEyebrow,
+    heroTitle: s.heroTitle,
+    heroHighlight: s.heroHighlight,
+    heroSubtitle: s.heroSubtitle,
   };
 }
 
