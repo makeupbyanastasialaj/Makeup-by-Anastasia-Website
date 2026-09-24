@@ -15,17 +15,17 @@ export default function PanelLayout({ children }: { children: React.ReactNode })
       .session()
       .then((s) => {
         if (!s.setupComplete) {
-          router.replace("/admin/setup");
+          router.replace("/manage/setup");
           return;
         }
         if (!s.authenticated) {
-          router.replace("/admin/login");
+          router.replace("/manage/login");
           return;
         }
         setBusinessName(s.businessName);
         setState("ok");
       })
-      .catch(() => router.replace("/admin/login"));
+      .catch(() => router.replace("/manage/login"));
   }, [router]);
 
   if (state === "checking") {

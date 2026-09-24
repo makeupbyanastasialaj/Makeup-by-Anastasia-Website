@@ -18,7 +18,7 @@ import { ok, badRequest, unauthorized, isAdmin, parseBody } from "../lib/http";
 app.http("adminServicesList", {
   methods: ["GET"],
   authLevel: "anonymous",
-  route: "admin/services",
+  route: "manage/services",
   handler: async (request: HttpRequest) => {
     if (!(await isAdmin(request))) return unauthorized();
     return ok({ services: await listServices(false) });
@@ -28,7 +28,7 @@ app.http("adminServicesList", {
 app.http("adminServiceSave", {
   methods: ["POST"],
   authLevel: "anonymous",
-  route: "admin/service-save",
+  route: "manage/service-save",
   handler: async (request: HttpRequest) => {
     if (!(await isAdmin(request))) return unauthorized();
     const s = await parseBody<Partial<Service>>(request);
@@ -52,7 +52,7 @@ app.http("adminServiceSave", {
 app.http("adminServiceDelete", {
   methods: ["POST"],
   authLevel: "anonymous",
-  route: "admin/service-delete",
+  route: "manage/service-delete",
   handler: async (request: HttpRequest) => {
     if (!(await isAdmin(request))) return unauthorized();
     const { id } = await parseBody<{ id?: string }>(request);
@@ -73,7 +73,7 @@ app.http("adminServiceDelete", {
 app.http("adminZonesList", {
   methods: ["GET"],
   authLevel: "anonymous",
-  route: "admin/zones",
+  route: "manage/zones",
   handler: async (request: HttpRequest) => {
     if (!(await isAdmin(request))) return unauthorized();
     return ok({ zones: await listZones(false) });
@@ -83,7 +83,7 @@ app.http("adminZonesList", {
 app.http("adminZoneSave", {
   methods: ["POST"],
   authLevel: "anonymous",
-  route: "admin/zone-save",
+  route: "manage/zone-save",
   handler: async (request: HttpRequest) => {
     if (!(await isAdmin(request))) return unauthorized();
     const z = await parseBody<Partial<Zone>>(request);
@@ -102,7 +102,7 @@ app.http("adminZoneSave", {
 app.http("adminZoneDelete", {
   methods: ["POST"],
   authLevel: "anonymous",
-  route: "admin/zone-delete",
+  route: "manage/zone-delete",
   handler: async (request: HttpRequest) => {
     if (!(await isAdmin(request))) return unauthorized();
     const { id } = await parseBody<{ id?: string }>(request);

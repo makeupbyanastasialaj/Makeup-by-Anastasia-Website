@@ -116,30 +116,30 @@ export const api = {
   // Auth
   session: () =>
     req<{ setupComplete: boolean; authenticated: boolean; totpEnabled: boolean; businessName: string }>(
-      "/admin/session",
+      "/manage/session",
     ),
-  setupInfo: () => req<{ setupComplete: boolean; secret?: string; qr?: string }>("/admin/setup"),
+  setupInfo: () => req<{ setupComplete: boolean; secret?: string; qr?: string }>("/manage/setup"),
   setupComplete: (body: { password: string; confirm: string; token: string; secret: string }) =>
-    post<{ ok: true }>("/admin/setup-complete", body),
-  login: (body: { password: string; token: string }) => post<{ ok: true }>("/admin/login", body),
-  logout: () => post<{ ok: true }>("/admin/logout"),
+    post<{ ok: true }>("/manage/setup-complete", body),
+  login: (body: { password: string; token: string }) => post<{ ok: true }>("/manage/login", body),
+  logout: () => post<{ ok: true }>("/manage/logout"),
 
   // Admin bookings
   calendar: () =>
-    req<{ bookings: Booking[]; pending: Booking[]; upcomingConfirmed: number; timezone: string }>("/admin/calendar"),
-  bookings: (filter: string) => req<{ bookings: Booking[]; timezone: string }>(`/admin/bookings?filter=${filter}`),
-  booking: (id: string) => req<{ booking: Booking; timezone: string }>(`/admin/bookings/${id}`),
-  setBookingStatus: (id: string, status: string) => post<{ ok: true }>("/admin/booking-status", { id, status }),
-  refundBooking: (id: string) => post<{ ok: true }>("/admin/booking-refund", { id }),
-  saveBookingNotes: (id: string, notes: string) => post<{ ok: true }>("/admin/booking-notes", { id, notes }),
+    req<{ bookings: Booking[]; pending: Booking[]; upcomingConfirmed: number; timezone: string }>("/manage/calendar"),
+  bookings: (filter: string) => req<{ bookings: Booking[]; timezone: string }>(`/manage/bookings?filter=${filter}`),
+  booking: (id: string) => req<{ booking: Booking; timezone: string }>(`/manage/bookings/${id}`),
+  setBookingStatus: (id: string, status: string) => post<{ ok: true }>("/manage/booking-status", { id, status }),
+  refundBooking: (id: string) => post<{ ok: true }>("/manage/booking-refund", { id }),
+  saveBookingNotes: (id: string, notes: string) => post<{ ok: true }>("/manage/booking-notes", { id, notes }),
 
   // Admin services / zones
-  adminServices: () => req<{ services: Service[] }>("/admin/services"),
-  saveService: (s: Partial<Service>) => post<{ ok: true; service: Service }>("/admin/service-save", s),
-  deleteService: (id: string) => post<{ ok: true }>("/admin/service-delete", { id }),
-  adminZones: () => req<{ zones: Zone[] }>("/admin/zones"),
-  saveZone: (z: Partial<Zone>) => post<{ ok: true; zone: Zone }>("/admin/zone-save", z),
-  deleteZone: (id: string) => post<{ ok: true }>("/admin/zone-delete", { id }),
+  adminServices: () => req<{ services: Service[] }>("/manage/services"),
+  saveService: (s: Partial<Service>) => post<{ ok: true; service: Service }>("/manage/service-save", s),
+  deleteService: (id: string) => post<{ ok: true }>("/manage/service-delete", { id }),
+  adminZones: () => req<{ zones: Zone[] }>("/manage/zones"),
+  saveZone: (z: Partial<Zone>) => post<{ ok: true; zone: Zone }>("/manage/zone-save", z),
+  deleteZone: (id: string) => post<{ ok: true }>("/manage/zone-delete", { id }),
 
   // Admin availability
   availability: () =>
@@ -147,16 +147,16 @@ export const api = {
       timezone: string;
       rules: { dayOfWeek: number; startMin: number; endMin: number; active: boolean }[];
       blocked: { id: string; label: string; reason: string }[];
-    }>("/admin/availability"),
+    }>("/manage/availability"),
   saveRules: (rules: { dayOfWeek: number; startMin: number; endMin: number }[]) =>
-    post<{ ok: true }>("/admin/availability-rules", { rules }),
+    post<{ ok: true }>("/manage/availability-rules", { rules }),
   addBlock: (body: { startISO: string; endISO: string; reason: string }) =>
-    post<{ ok: true }>("/admin/availability-block", body),
-  removeBlock: (id: string) => post<{ ok: true }>("/admin/availability-unblock", { id }),
+    post<{ ok: true }>("/manage/availability-block", body),
+  removeBlock: (id: string) => post<{ ok: true }>("/manage/availability-unblock", { id }),
 
   // Admin settings
   adminSettings: () =>
-    req<{ stripeEnabled: boolean; settings: Record<string, unknown> }>("/admin/settings"),
-  saveSettings: (s: Record<string, unknown>) => post<{ ok: true }>("/admin/settings-save", s),
-  changePassword: (body: { current: string; next: string }) => post<{ ok: true }>("/admin/password", body),
+    req<{ stripeEnabled: boolean; settings: Record<string, unknown> }>("/manage/settings"),
+  saveSettings: (s: Record<string, unknown>) => post<{ ok: true }>("/manage/settings-save", s),
+  changePassword: (body: { current: string; next: string }) => post<{ ok: true }>("/manage/password", body),
 };

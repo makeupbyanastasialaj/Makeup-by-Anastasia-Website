@@ -3,11 +3,11 @@ import { getSettings, listRules, replaceRules, listBlocked, addBlocked, deleteBl
 import { formatTz } from "../lib/time";
 import { ok, badRequest, unauthorized, isAdmin, parseBody } from "../lib/http";
 
-// GET /api/admin/availability
+// GET /api/manage/availability
 app.http("adminAvailabilityGet", {
   methods: ["GET"],
   authLevel: "anonymous",
-  route: "admin/availability",
+  route: "manage/availability",
   handler: async (request: HttpRequest) => {
     if (!(await isAdmin(request))) return unauthorized();
     const settings = await getSettings();
@@ -31,11 +31,11 @@ app.http("adminAvailabilityGet", {
   },
 });
 
-// POST /api/admin/availability-rules  { rules: [{dayOfWeek,startMin,endMin}] }
+// POST /api/manage/availability-rules  { rules: [{dayOfWeek,startMin,endMin}] }
 app.http("adminAvailabilityRules", {
   methods: ["POST"],
   authLevel: "anonymous",
-  route: "admin/availability-rules",
+  route: "manage/availability-rules",
   handler: async (request: HttpRequest) => {
     if (!(await isAdmin(request))) return unauthorized();
     const { rules } = await parseBody<{ rules?: { dayOfWeek: number; startMin: number; endMin: number }[] }>(request);
@@ -48,11 +48,11 @@ app.http("adminAvailabilityRules", {
   },
 });
 
-// POST /api/admin/availability-block  { startISO, endISO, reason }
+// POST /api/manage/availability-block  { startISO, endISO, reason }
 app.http("adminAvailabilityBlock", {
   methods: ["POST"],
   authLevel: "anonymous",
-  route: "admin/availability-block",
+  route: "manage/availability-block",
   handler: async (request: HttpRequest) => {
     if (!(await isAdmin(request))) return unauthorized();
     const { startISO, endISO, reason } = await parseBody<{ startISO?: string; endISO?: string; reason?: string }>(request);
@@ -65,11 +65,11 @@ app.http("adminAvailabilityBlock", {
   },
 });
 
-// POST /api/admin/availability-unblock  { id }
+// POST /api/manage/availability-unblock  { id }
 app.http("adminAvailabilityUnblock", {
   methods: ["POST"],
   authLevel: "anonymous",
-  route: "admin/availability-unblock",
+  route: "manage/availability-unblock",
   handler: async (request: HttpRequest) => {
     if (!(await isAdmin(request))) return unauthorized();
     const { id } = await parseBody<{ id?: string }>(request);

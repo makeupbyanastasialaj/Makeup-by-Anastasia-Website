@@ -6,11 +6,11 @@ import { ok, badRequest, json, unauthorized, isAdmin, parseBody } from "../lib/h
 
 const VALID_STATUSES = Object.values(BookingStatus) as string[];
 
-// GET /api/admin/bookings?filter=upcoming|pending|past|all
+// GET /api/manage/bookings?filter=upcoming|pending|past|all
 app.http("adminBookingsList", {
   methods: ["GET"],
   authLevel: "anonymous",
-  route: "admin/bookings",
+  route: "manage/bookings",
   handler: async (request: HttpRequest) => {
     if (!(await isAdmin(request))) return unauthorized();
     const filter = request.query.get("filter") ?? "upcoming";
@@ -33,11 +33,11 @@ app.http("adminBookingsList", {
   },
 });
 
-// GET /api/admin/calendar?month=YYYY-MM  (+ pending list + stats)
+// GET /api/manage/calendar?month=YYYY-MM  (+ pending list + stats)
 app.http("adminCalendar", {
   methods: ["GET"],
   authLevel: "anonymous",
-  route: "admin/calendar",
+  route: "manage/calendar",
   handler: async (request: HttpRequest) => {
     if (!(await isAdmin(request))) return unauthorized();
     const now = new Date();
@@ -59,11 +59,11 @@ app.http("adminCalendar", {
   },
 });
 
-// GET /api/admin/bookings/{id}
+// GET /api/manage/bookings/{id}
 app.http("adminBookingDetail", {
   methods: ["GET"],
   authLevel: "anonymous",
-  route: "admin/bookings/{id}",
+  route: "manage/bookings/{id}",
   handler: async (request: HttpRequest) => {
     if (!(await isAdmin(request))) return unauthorized();
     const b = await getBooking(request.params.id);
@@ -73,11 +73,11 @@ app.http("adminBookingDetail", {
   },
 });
 
-// POST /api/admin/booking-status  { id, status }
+// POST /api/manage/booking-status  { id, status }
 app.http("adminBookingStatus", {
   methods: ["POST"],
   authLevel: "anonymous",
-  route: "admin/booking-status",
+  route: "manage/booking-status",
   handler: async (request: HttpRequest) => {
     if (!(await isAdmin(request))) return unauthorized();
     const { id, status } = await parseBody<{ id?: string; status?: string }>(request);
@@ -105,11 +105,11 @@ app.http("adminBookingStatus", {
   },
 });
 
-// POST /api/admin/booking-refund  { id }
+// POST /api/manage/booking-refund  { id }
 app.http("adminBookingRefund", {
   methods: ["POST"],
   authLevel: "anonymous",
-  route: "admin/booking-refund",
+  route: "manage/booking-refund",
   handler: async (request: HttpRequest) => {
     if (!(await isAdmin(request))) return unauthorized();
     const { id } = await parseBody<{ id?: string }>(request);
@@ -130,11 +130,11 @@ app.http("adminBookingRefund", {
   },
 });
 
-// POST /api/admin/booking-notes  { id, notes }
+// POST /api/manage/booking-notes  { id, notes }
 app.http("adminBookingNotes", {
   methods: ["POST"],
   authLevel: "anonymous",
-  route: "admin/booking-notes",
+  route: "manage/booking-notes",
   handler: async (request: HttpRequest) => {
     if (!(await isAdmin(request))) return unauthorized();
     const { id, notes } = await parseBody<{ id?: string; notes?: string }>(request);

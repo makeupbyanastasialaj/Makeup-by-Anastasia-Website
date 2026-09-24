@@ -104,7 +104,7 @@ export default function DashboardPage() {
               <div key={b.id} className="card flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <div className="flex items-center gap-2">
-                    <Link href={`/admin/bookings/detail?id=${b.id}`} className="font-serif text-lg text-ink hover:underline">{b.customerName}</Link>
+                    <Link href={`/manage/bookings/detail?id=${b.id}`} className="font-serif text-lg text-ink hover:underline">{b.customerName}</Link>
                     <StatusBadge status={b.status} />
                   </div>
                   <p className="mt-0.5 text-sm text-ink-soft">
@@ -146,7 +146,7 @@ export default function DashboardPage() {
                   <div className={`mb-1 text-right text-xs ${isToday ? "font-bold text-ink" : "text-ink-faint"}`}>{dayNum}</div>
                   <div className="space-y-1">
                     {items.slice(0, 4).map((b) => (
-                      <Link key={b.id} href={`/admin/bookings/detail?id=${b.id}`} className={`block truncate rounded border px-1.5 py-0.5 text-[0.68rem] leading-tight ${CHIP_STYLES[b.status] ?? "bg-cream-100 border-sand"}`} title={`${formatTz(new Date(b.startAt), "h:mm a", tz)} — ${b.customerName}`}>
+                      <Link key={b.id} href={`/manage/bookings/detail?id=${b.id}`} className={`block truncate rounded border px-1.5 py-0.5 text-[0.68rem] leading-tight ${CHIP_STYLES[b.status] ?? "bg-cream-100 border-sand"}`} title={`${formatTz(new Date(b.startAt), "h:mm a", tz)} — ${b.customerName}`}>
                         {formatTz(new Date(b.startAt), "h:mm", tz)} {b.customerName.split(" ")[0]}
                       </Link>
                     ))}

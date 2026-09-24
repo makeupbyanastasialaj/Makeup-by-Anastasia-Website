@@ -10,11 +10,11 @@ import {
 } from "../lib/auth";
 import { ok, badRequest, parseBody, isAdmin, sessionCookie, clearSessionCookie, safe } from "../lib/http";
 
-// GET /api/admin/session — how the frontend decides where to route.
+// GET /api/manage/session — how the frontend decides where to route.
 app.http("adminSession", {
   methods: ["GET"],
   authLevel: "anonymous",
-  route: "admin/session",
+  route: "manage/session",
   handler: safe(async (request: HttpRequest) => {
     const settings = await getSettings();
     return ok({
@@ -26,11 +26,11 @@ app.http("adminSession", {
   }),
 });
 
-// GET /api/admin/setup — issue a fresh TOTP secret + QR for first-run setup.
+// GET /api/manage/setup — issue a fresh TOTP secret + QR for first-run setup.
 app.http("adminSetupInfo", {
   methods: ["GET"],
   authLevel: "anonymous",
-  route: "admin/setup",
+  route: "manage/setup",
   handler: safe(async () => {
     const settings = await getSettings();
     if (settings.setupComplete) return ok({ setupComplete: true });
@@ -41,11 +41,11 @@ app.http("adminSetupInfo", {
   }),
 });
 
-// POST /api/admin/setup — complete first-run setup.
+// POST /api/manage/setup — complete first-run setup.
 app.http("adminSetupComplete", {
   methods: ["POST"],
   authLevel: "anonymous",
-  route: "admin/setup-complete",
+  route: "manage/setup-complete",
   handler: async (request: HttpRequest) => {
     const settings = await getSettings();
     if (settings.setupComplete) return badRequest("Setup has already been completed.");
@@ -68,11 +68,11 @@ app.http("adminSetupComplete", {
   },
 });
 
-// POST /api/admin/login
+// POST /api/manage/login
 app.http("adminLogin", {
   methods: ["POST"],
   authLevel: "anonymous",
-  route: "admin/login",
+  route: "manage/login",
   handler: async (request: HttpRequest) => {
     const settings = await getSettings();
     if (!settings.setupComplete) return badRequest("Please complete first-time setup first.");
@@ -87,11 +87,11 @@ app.http("adminLogin", {
   },
 });
 
-// POST /api/admin/logout
+// POST /api/manage/logout
 app.http("adminLogout", {
   methods: ["POST"],
   authLevel: "anonymous",
-  route: "admin/logout",
+  route: "manage/logout",
   handler: async () => {
     return ok({ ok: true }, { cookies: [clearSessionCookie()] });
   },

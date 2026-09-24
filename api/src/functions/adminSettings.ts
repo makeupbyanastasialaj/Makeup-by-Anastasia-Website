@@ -4,11 +4,11 @@ import { hashPassword, verifyPassword } from "../lib/auth";
 import { stripeEnabled } from "../lib/stripe";
 import { ok, badRequest, unauthorized, isAdmin, parseBody } from "../lib/http";
 
-// GET /api/admin/settings — editable settings (never returns password/secret).
+// GET /api/manage/settings — editable settings (never returns password/secret).
 app.http("adminSettingsGet", {
   methods: ["GET"],
   authLevel: "anonymous",
-  route: "admin/settings",
+  route: "manage/settings",
   handler: async (request: HttpRequest) => {
     if (!(await isAdmin(request))) return unauthorized();
     const s = await getSettings();
@@ -33,11 +33,11 @@ app.http("adminSettingsGet", {
   },
 });
 
-// POST /api/admin/settings
+// POST /api/manage/settings
 app.http("adminSettingsSave", {
   methods: ["POST"],
   authLevel: "anonymous",
-  route: "admin/settings-save",
+  route: "manage/settings-save",
   handler: async (request: HttpRequest) => {
     if (!(await isAdmin(request))) return unauthorized();
     const s = await parseBody<Partial<Settings>>(request);
@@ -60,11 +60,11 @@ app.http("adminSettingsSave", {
   },
 });
 
-// POST /api/admin/password  { current, next }
+// POST /api/manage/password  { current, next }
 app.http("adminPasswordChange", {
   methods: ["POST"],
   authLevel: "anonymous",
-  route: "admin/password",
+  route: "manage/password",
   handler: async (request: HttpRequest) => {
     if (!(await isAdmin(request))) return unauthorized();
     const { current, next } = await parseBody<{ current?: string; next?: string }>(request);

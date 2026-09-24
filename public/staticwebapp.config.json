@@ -1,6 +1,6 @@
 {
   "routes": [
-    { "route": "/admin", "redirect": "/admin/", "statusCode": 301 },
+    { "route": "/manage", "redirect": "/manage/", "statusCode": 301 },
     { "route": "/book", "redirect": "/book/", "statusCode": 301 },
     { "route": "/booking", "redirect": "/booking/", "statusCode": 301 }
   ],

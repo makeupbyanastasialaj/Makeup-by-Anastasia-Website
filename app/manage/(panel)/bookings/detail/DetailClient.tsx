@@ -34,7 +34,7 @@ export default function DetailClient() {
   if (!booking) {
     return (
       <div>
-        <Link href="/admin/bookings" className="text-sm text-ink-soft hover:text-ink">← All bookings</Link>
+        <Link href="/manage/bookings" className="text-sm text-ink-soft hover:text-ink">← All bookings</Link>
         <p className="mt-6 text-ink-faint">Booking not found.</p>
       </div>
     );
@@ -44,7 +44,7 @@ export default function DetailClient() {
 
   return (
     <div>
-      <Link href="/admin/bookings" className="text-sm text-ink-soft hover:text-ink">← All bookings</Link>
+      <Link href="/manage/bookings" className="text-sm text-ink-soft hover:text-ink">← All bookings</Link>
 
       <div className="mt-3 mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>

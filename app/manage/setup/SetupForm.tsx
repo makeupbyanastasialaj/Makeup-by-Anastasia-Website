@@ -22,7 +22,7 @@ export default function SetupForm() {
       .setupInfo()
       .then((info) => {
         if (info.setupComplete) {
-          router.replace("/admin/login");
+          router.replace("/manage/login");
           return;
         }
         setSecret(info.secret ?? "");
@@ -38,7 +38,7 @@ export default function SetupForm() {
     setError(null);
     try {
       await api.setupComplete({ password, confirm, token, secret });
-      router.replace("/admin");
+      router.replace("/manage");
       router.refresh();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Setup failed. Please try again.");

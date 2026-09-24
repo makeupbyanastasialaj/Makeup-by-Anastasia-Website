@@ -6,12 +6,12 @@ import { useState } from "react";
 import { api } from "@/lib/api";
 
 const NAV = [
-  { href: "/admin", label: "Dashboard", exact: true },
-  { href: "/admin/bookings", label: "Bookings" },
-  { href: "/admin/services", label: "Services" },
-  { href: "/admin/zones", label: "Travel zones" },
-  { href: "/admin/availability", label: "Availability" },
-  { href: "/admin/settings", label: "Settings" },
+  { href: "/manage", label: "Dashboard", exact: true },
+  { href: "/manage/bookings", label: "Bookings" },
+  { href: "/manage/services", label: "Services" },
+  { href: "/manage/zones", label: "Travel zones" },
+  { href: "/manage/availability", label: "Availability" },
+  { href: "/manage/settings", label: "Settings" },
 ];
 
 export default function AdminNav({ businessName }: { businessName: string }) {
@@ -30,7 +30,7 @@ export default function AdminNav({ businessName }: { businessName: string }) {
     } catch {
       // ignore — clear client state regardless
     }
-    router.replace("/admin/login");
+    router.replace("/manage/login");
     router.refresh();
   }
 

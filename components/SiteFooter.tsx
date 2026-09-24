@@ -34,7 +34,7 @@ export default function SiteFooter() {
           <ul className="space-y-2">
             <li><Link href="/#services" className="hover:text-ink">Services &amp; pricing</Link></li>
             <li><Link href="/book" className="hover:text-ink">Book an appointment</Link></li>
-            <li><Link href="/admin" className="hover:text-ink">Artist login</Link></li>
+            <li><Link href="/manage" className="hover:text-ink">Artist login</Link></li>
           </ul>
         </div>
 

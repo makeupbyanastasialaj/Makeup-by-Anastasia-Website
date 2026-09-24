@@ -57,7 +57,7 @@ export default function BookingsPage() {
       ) : (
         <div className="space-y-2">
           {bookings.map((b) => (
-            <Link key={b.id} href={`/admin/bookings/detail?id=${b.id}`} className="card flex items-center justify-between gap-4 p-4 transition hover:border-sand-dark">
+            <Link key={b.id} href={`/manage/bookings/detail?id=${b.id}`} className="card flex items-center justify-between gap-4 p-4 transition hover:border-sand-dark">
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
                   <span className="truncate font-serif text-lg text-ink">{b.customerName}</span>

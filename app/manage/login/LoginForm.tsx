@@ -18,11 +18,11 @@ export default function LoginForm() {
       .session()
       .then((s) => {
         if (!s.setupComplete) {
-          router.replace("/admin/setup");
+          router.replace("/manage/setup");
           return;
         }
         if (s.authenticated) {
-          router.replace("/admin");
+          router.replace("/manage");
           return;
         }
         setTotpEnabled(s.totpEnabled);
@@ -37,7 +37,7 @@ export default function LoginForm() {
     setError(null);
     try {
       await api.login({ password, token });
-      router.replace("/admin");
+      router.replace("/manage");
       router.refresh();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Sign-in failed.");
