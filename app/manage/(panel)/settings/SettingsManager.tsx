@@ -88,7 +88,7 @@ export default function SettingsManager({ settings, stripeEnabled }: { settings:
       // Keep uploads modest so they stay well under the API request-size limit.
       const maxW = kind === "logo" ? 800 : kind === "about" ? 900 : 700;
       const maxChars = kind === "gallery" ? 250_000 : 350_000;
-      const dataUrl = await resizeImage(file, maxW, maxChars);
+      const dataUrl = await resizeImage(file, maxW, maxChars, kind === "logo");
       const { url } = await api.uploadImage(kind, dataUrl, index);
       applyUrl(kind, url, index);
     } catch (e) {
@@ -391,8 +391,11 @@ function ColorField({ label, value, onChange }: { label: string; value: string; 
  * storage. Scales down to at most `maxWidth` px wide (never upscales) and keeps
  * quality high; only steps quality/size down if needed to stay under the cap.
  */
-function resizeImage(file: File, maxWidth: number, maxChars = 400_000): Promise<string> {
-  const MAX_CHARS = maxChars;
+function resizeImage(file: File, maxWidth: number, maxChars = 400_000, transparent = false): Promise<string> {
+  // Photos compress as JPEG (small, universal). The logo keeps transparency, so
+  // it uses WebP then PNG. Note: Safari's canvas ignores WebP and returns PNG,
+  // so we detect the actual type produced and fall through accordingly.
+  const types = transparent ? ["image/webp", "image/png"] : ["image/webp", "image/jpeg"];
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onerror = () => reject(new Error("read failed"));
@@ -402,7 +405,7 @@ function resizeImage(file: File, maxWidth: number, maxChars = 400_000): Promise<
       img.onload = () => {
         const srcW = img.width || maxWidth;
         const srcH = img.height || maxWidth;
-        for (const targetW of [maxWidth, Math.round(maxWidth * 0.8), Math.round(maxWidth * 0.6)]) {
+        for (const targetW of [maxWidth, Math.round(maxWidth * 0.75), Math.round(maxWidth * 0.55), Math.round(maxWidth * 0.4)]) {
           const scale = Math.min(1, targetW / srcW);
           const cw = Math.max(1, Math.round(srcW * scale));
           const ch = Math.max(1, Math.round(srcH * scale));
@@ -411,13 +414,22 @@ function resizeImage(file: File, maxWidth: number, maxChars = 400_000): Promise<
           canvas.height = ch;
           const ctx = canvas.getContext("2d");
           if (!ctx) return reject(new Error("no canvas"));
-          ctx.clearRect(0, 0, cw, ch);
+          if (!transparent) {
+            ctx.fillStyle = "#ffffff"; // flatten transparency for JPEG
+            ctx.fillRect(0, 0, cw, ch);
+          } else {
+            ctx.clearRect(0, 0, cw, ch);
+          }
           ctx.drawImage(img, 0, 0, cw, ch);
-          for (const q of [0.92, 0.85, 0.75, 0.65]) {
-            let url = canvas.toDataURL("image/webp", q);
-            if (!url.startsWith("data:image/webp")) url = canvas.toDataURL("image/png");
-            if (url.length <= MAX_CHARS) return resolve(url);
-            if (!url.startsWith("data:image/webp")) break; // png won't shrink with quality
+          for (const type of types) {
+            for (const q of [0.9, 0.8, 0.7, 0.6]) {
+              const url = canvas.toDataURL(type, q);
+              const actual = url.slice(5, url.indexOf(";"));
+              if (url.length <= maxChars) return resolve(url);
+              // PNG is lossless (quality won't help) and if the browser ignored the
+              // requested type, retrying that type is pointless — move to the next.
+              if (actual !== type || type === "image/png") break;
+            }
           }
         }
         reject(new Error("too large"));
