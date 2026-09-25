@@ -13,7 +13,7 @@ export default function SiteHeader() {
     api
       .getPublic()
       .then((d) => {
-        setLogo(d.settings.logoDataUrl || null);
+        setLogo(d.settings.logoImageUrl || d.settings.logoDataUrl || null);
         setName(d.settings.businessName || "Makeup by Anastasia Laj");
       })
       .catch(() => {});

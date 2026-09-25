@@ -28,6 +28,10 @@ type Settings = {
   heroHighlight: string;
   heroSubtitle: string;
   fontTheme: string;
+  logoImageUrl: string;
+  aboutImageUrl: string;
+  aboutTitle: string;
+  aboutText: string;
 };
 
 const CURRENCIES = ["GBP", "EUR", "USD", "AUD", "CAD", "NZD"];
@@ -44,6 +48,8 @@ export default function SettingsManager({ settings, stripeEnabled }: { settings:
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
   const [logoErr, setLogoErr] = useState<string | null>(null);
+  const [aboutErr, setAboutErr] = useState<string | null>(null);
+  const [uploading, setUploading] = useState<"" | "logo" | "about">("");
   const [pending, startTransition] = useTransition();
 
   function set<K extends keyof Settings>(key: K, value: Settings[K]) {
@@ -51,12 +57,29 @@ export default function SettingsManager({ settings, stripeEnabled }: { settings:
     setSaved(false);
   }
 
-  async function onLogoFile(file: File) {
-    setLogoErr(null);
+  async function uploadFile(kind: "logo" | "about", file: File) {
+    const setErr = kind === "logo" ? setLogoErr : setAboutErr;
+    setErr(null);
+    setUploading(kind);
     try {
-      set("logoDataUrl", await resizeImage(file, 30000));
+      const dataUrl = await resizeImage(file, kind === "logo" ? 900 : 1200);
+      const { url } = await api.uploadImage(kind, dataUrl);
+      set(kind === "logo" ? "logoImageUrl" : "aboutImageUrl", url);
     } catch {
-      setLogoErr("Couldn't use that image — please try a smaller or simpler PNG/JPG.");
+      setErr("Couldn't upload that image — please try a different PNG or JPG.");
+    } finally {
+      setUploading("");
+    }
+  }
+
+  async function removeImage(kind: "logo" | "about") {
+    const setErr = kind === "logo" ? setLogoErr : setAboutErr;
+    setErr(null);
+    try {
+      await api.uploadImage(kind, "");
+      set(kind === "logo" ? "logoImageUrl" : "aboutImageUrl", "");
+    } catch {
+      setErr("Couldn't remove the image. Please try again.");
     }
   }
 
@@ -96,10 +119,10 @@ export default function SettingsManager({ settings, stripeEnabled }: { settings:
         <div className="mb-6">
           <label className="label">Logo</label>
           <div className="flex items-center gap-4">
-            <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-sand bg-white">
-              {f.logoDataUrl ? (
+            <div className="flex h-20 w-28 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-sand bg-white">
+              {(f.logoImageUrl || f.logoDataUrl) ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={f.logoDataUrl} alt="Logo preview" className="h-full w-full object-contain" />
+                <img src={f.logoImageUrl || f.logoDataUrl} alt="Logo preview" className="h-full w-full object-contain" />
               ) : (
                 <span className="px-1 text-center text-[0.65rem] text-ink-faint">No logo yet</span>
               )}
@@ -108,15 +131,17 @@ export default function SettingsManager({ settings, stripeEnabled }: { settings:
               <input
                 type="file"
                 accept="image/png,image/jpeg,image/webp"
-                onChange={(e) => { const file = e.target.files?.[0]; if (file) onLogoFile(file); e.target.value = ""; }}
+                disabled={uploading === "logo"}
+                onChange={(e) => { const file = e.target.files?.[0]; if (file) uploadFile("logo", file); e.target.value = ""; }}
                 className="text-sm text-ink-soft file:mr-3 file:rounded-full file:border file:border-sand file:bg-cream-100 file:px-4 file:py-2 file:text-xs file:font-semibold file:uppercase file:tracking-wide file:text-ink-soft"
               />
-              {f.logoDataUrl && (
-                <button type="button" onClick={() => set("logoDataUrl", "")} className="self-start text-xs text-red-700 underline">Remove logo</button>
+              {uploading === "logo" && <span className="text-xs text-ink-faint">Uploading…</span>}
+              {(f.logoImageUrl || f.logoDataUrl) && uploading !== "logo" && (
+                <button type="button" onClick={() => removeImage("logo")} className="self-start text-xs text-red-700 underline">Remove logo</button>
               )}
             </div>
           </div>
-          <p className="mt-2 text-xs text-ink-faint">Shown at the top of your homepage. It&apos;s resized automatically — a PNG with a transparent background looks best.</p>
+          <p className="mt-2 text-xs text-ink-faint">Shown top-left and on your homepage. For a crisp result use a high-resolution PNG with a transparent background (it&apos;s stored at full quality).</p>
           {logoErr && <p className="mt-1 text-xs text-red-700">{logoErr}</p>}
         </div>
 
@@ -144,6 +169,45 @@ export default function SettingsManager({ settings, stripeEnabled }: { settings:
           <Field label="Headline"><input className="field" value={f.heroTitle} onChange={(e) => set("heroTitle", e.target.value)} /></Field>
           <Field label="Script line (under the headline)"><input className="field" value={f.heroHighlight} onChange={(e) => set("heroHighlight", e.target.value)} /></Field>
           <Field label="Intro paragraph" full><textarea className="field min-h-[5rem]" rows={3} value={f.heroSubtitle} onChange={(e) => set("heroSubtitle", e.target.value)} /></Field>
+        </div>
+      </section>
+
+      <section className="card p-5">
+        <h2 className="mb-1 text-xl text-ink">About me</h2>
+        <p className="mb-4 text-sm text-ink-soft">An introduction on your homepage with your photo — like a &ldquo;Meet the artist&rdquo; section. Leave the text empty to hide it.</p>
+
+        <div className="mb-4">
+          <label className="label">Your photo</label>
+          <div className="flex items-center gap-4">
+            <div className="h-28 w-24 shrink-0 overflow-hidden rounded-lg border border-sand bg-white">
+              {f.aboutImageUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={f.aboutImageUrl} alt="About preview" className="h-full w-full object-cover" />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center px-1 text-center text-[0.65rem] text-ink-faint">No photo yet</div>
+              )}
+            </div>
+            <div className="flex flex-col gap-2">
+              <input
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                disabled={uploading === "about"}
+                onChange={(e) => { const file = e.target.files?.[0]; if (file) uploadFile("about", file); e.target.value = ""; }}
+                className="text-sm text-ink-soft file:mr-3 file:rounded-full file:border file:border-sand file:bg-cream-100 file:px-4 file:py-2 file:text-xs file:font-semibold file:uppercase file:tracking-wide file:text-ink-soft"
+              />
+              {uploading === "about" && <span className="text-xs text-ink-faint">Uploading…</span>}
+              {f.aboutImageUrl && uploading !== "about" && (
+                <button type="button" onClick={() => removeImage("about")} className="self-start text-xs text-red-700 underline">Remove photo</button>
+              )}
+            </div>
+          </div>
+          <p className="mt-2 text-xs text-ink-faint">A portrait photo works best — it&apos;s shown tall on the right of the section.</p>
+          {aboutErr && <p className="mt-1 text-xs text-red-700">{aboutErr}</p>}
+        </div>
+
+        <div className="grid gap-4">
+          <Field label="Heading"><input className="field" value={f.aboutTitle} onChange={(e) => set("aboutTitle", e.target.value)} placeholder="e.g. Meet Anastasia" /></Field>
+          <Field label="About text"><textarea className="field min-h-[8rem]" rows={7} value={f.aboutText} onChange={(e) => set("aboutText", e.target.value)} placeholder="Tell your clients about yourself and your work. Leave a blank line between paragraphs." /></Field>
         </div>
       </section>
 
@@ -263,10 +327,12 @@ function ColorField({ label, value, onChange }: { label: string; value: string; 
 }
 
 /**
- * Resize an image file in the browser to a small data URL that fits in Table
- * Storage. Tries progressively smaller widths/quality until under maxChars.
+ * Resize an image file in the browser to a crisp data URL for upload to blob
+ * storage. Scales down to at most `maxWidth` px wide (never upscales) and keeps
+ * quality high; only steps quality/size down if needed to stay under the cap.
  */
-function resizeImage(file: File, maxChars: number): Promise<string> {
+function resizeImage(file: File, maxWidth: number): Promise<string> {
+  const MAX_CHARS = 1_400_000; // ~1 MB, comfortably under the upload limit
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onerror = () => reject(new Error("read failed"));
@@ -274,10 +340,12 @@ function resizeImage(file: File, maxChars: number): Promise<string> {
       const img = new window.Image();
       img.onerror = () => reject(new Error("decode failed"));
       img.onload = () => {
-        for (const w of [360, 300, 240, 180, 140]) {
-          const scale = Math.min(1, w / (img.width || w));
-          const cw = Math.max(1, Math.round((img.width || w) * scale));
-          const ch = Math.max(1, Math.round((img.height || w) * scale));
+        const srcW = img.width || maxWidth;
+        const srcH = img.height || maxWidth;
+        for (const targetW of [maxWidth, Math.round(maxWidth * 0.8), Math.round(maxWidth * 0.6)]) {
+          const scale = Math.min(1, targetW / srcW);
+          const cw = Math.max(1, Math.round(srcW * scale));
+          const ch = Math.max(1, Math.round(srcH * scale));
           const canvas = document.createElement("canvas");
           canvas.width = cw;
           canvas.height = ch;
@@ -285,10 +353,10 @@ function resizeImage(file: File, maxChars: number): Promise<string> {
           if (!ctx) return reject(new Error("no canvas"));
           ctx.clearRect(0, 0, cw, ch);
           ctx.drawImage(img, 0, 0, cw, ch);
-          for (const q of [0.85, 0.7, 0.55]) {
+          for (const q of [0.92, 0.85, 0.75, 0.65]) {
             let url = canvas.toDataURL("image/webp", q);
             if (!url.startsWith("data:image/webp")) url = canvas.toDataURL("image/png");
-            if (url.length <= maxChars) return resolve(url);
+            if (url.length <= MAX_CHARS) return resolve(url);
             if (!url.startsWith("data:image/webp")) break; // png won't shrink with quality
           }
         }

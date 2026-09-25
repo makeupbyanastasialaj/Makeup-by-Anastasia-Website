@@ -27,6 +27,10 @@ export interface Settings {
   heroHighlight: string;
   heroSubtitle: string;
   fontTheme: string; // id of a curated font pairing (see lib/fonts on the frontend)
+  logoImageUrl: string; // served path to the logo blob, or "" (falls back to logoDataUrl/default)
+  aboutImageUrl: string; // served path to the about photo blob, or ""
+  aboutTitle: string;
+  aboutText: string;
   adminPasswordHash: string;
   totpSecret: string;
   totpEnabled: boolean;
@@ -136,6 +140,10 @@ export const DEFAULT_SETTINGS: Settings = {
   heroSubtitle:
     "Timeless, long-wearing makeup for weddings, events and every occasion worth remembering — in my studio, or travelling to you.",
   fontTheme: "classic",
+  logoImageUrl: "",
+  aboutImageUrl: "",
+  aboutTitle: "About me",
+  aboutText: "",
   adminPasswordHash: "",
   totpSecret: "",
   totpEnabled: false,

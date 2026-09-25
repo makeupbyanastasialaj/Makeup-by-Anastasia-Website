@@ -4,6 +4,7 @@
 // otherwise take the whole admin area down while /api/public kept working).
 const modules = [
   "./functions/public",
+  "./functions/media",
   "./functions/auth",
   "./functions/adminBookings",
   "./functions/adminCatalog",

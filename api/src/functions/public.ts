@@ -30,6 +30,10 @@ function publicSettings(s: Awaited<ReturnType<typeof getSettings>>) {
     heroHighlight: s.heroHighlight,
     heroSubtitle: s.heroSubtitle,
     fontTheme: s.fontTheme,
+    logoImageUrl: s.logoImageUrl,
+    aboutImageUrl: s.aboutImageUrl,
+    aboutTitle: s.aboutTitle,
+    aboutText: s.aboutText,
   };
 }
 

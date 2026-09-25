@@ -20,13 +20,19 @@ export default function HomePage() {
 
   const s = data?.settings;
   const businessName = s?.businessName || "Makeup by Anastasia Laj";
-  const logoUrl = s?.logoDataUrl || "/logo.png";
+  const logoUrl = s?.logoImageUrl || s?.logoDataUrl || "/logo.png";
   const heroEyebrow = s?.heroEyebrow || "Bridal & Occasion Makeup Artistry";
   const heroTitle = s?.heroTitle || "Effortless elegance,";
   const heroHighlight = s?.heroHighlight || "beautifully you";
   const heroSubtitle =
     s?.heroSubtitle ||
     "Timeless, long-wearing makeup for weddings, events and every occasion worth remembering — in my studio, or travelling to you.";
+
+  const aboutTitle = s?.aboutTitle || "About me";
+  const aboutText = s?.aboutText || "";
+  const aboutImageUrl = s?.aboutImageUrl || "";
+  const aboutParas = aboutText.split(/\n\s*\n/).map((t) => t.trim()).filter(Boolean);
+  const showAbout = aboutParas.length > 0 || !!aboutImageUrl;
 
   return (
     <>
@@ -59,6 +65,32 @@ export default function HomePage() {
           </p>
         </div>
       </section>
+
+      {/* About */}
+      {showAbout && (
+        <section id="about" className="border-t border-sand/60 bg-cream-50">
+          <div className="mx-auto grid max-w-5xl items-center gap-10 px-4 py-16 sm:px-6 md:grid-cols-2 md:gap-14 md:py-20">
+            <div className="order-2 md:order-1">
+              <h2 className="text-4xl leading-tight text-ink sm:text-5xl">{aboutTitle}</h2>
+              <div className="mt-6 space-y-4 text-base leading-relaxed text-ink-soft">
+                {aboutParas.map((p, i) => (
+                  <p key={i}>{p}</p>
+                ))}
+              </div>
+            </div>
+            {aboutImageUrl && (
+              <div className="order-1 md:order-2">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={aboutImageUrl}
+                  alt={aboutTitle}
+                  className="mx-auto aspect-[3/4] w-full max-w-sm rounded-2xl object-cover shadow-sm"
+                />
+              </div>
+            )}
+          </div>
+        </section>
+      )}
 
       {/* How it works */}
       <section id="how" className="border-y border-sand/60 bg-cream-50">

@@ -46,6 +46,10 @@ app.http("adminSettingsGet", {
         heroHighlight: s.heroHighlight,
         heroSubtitle: s.heroSubtitle,
         fontTheme: s.fontTheme,
+        logoImageUrl: s.logoImageUrl,
+        aboutImageUrl: s.aboutImageUrl,
+        aboutTitle: s.aboutTitle,
+        aboutText: s.aboutText,
       },
     });
   },
@@ -97,6 +101,8 @@ app.http("adminSettingsSave", {
       heroHighlight: text(s.heroHighlight, 120, DEFAULT_SETTINGS.heroHighlight),
       heroSubtitle: text(s.heroSubtitle, 400, DEFAULT_SETTINGS.heroSubtitle),
       fontTheme: typeof s.fontTheme === "string" && /^[a-z]{1,20}$/.test(s.fontTheme) ? s.fontTheme : "classic",
+      aboutTitle: text(s.aboutTitle, 80, DEFAULT_SETTINGS.aboutTitle),
+      aboutText: text(s.aboutText, 1500, ""),
     });
     return ok({ ok: true });
   },
