@@ -40,7 +40,7 @@ export default function HomePage() {
       <section className="relative overflow-hidden">
         <div className="mx-auto flex max-w-4xl flex-col items-center px-4 pb-16 pt-14 text-center sm:px-6 sm:pt-20">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={logoUrl} alt={businessName} width={340} height={340} className="mb-2 h-auto w-56 object-contain sm:w-72" />
+          <img src={logoUrl} alt={businessName} width={340} height={340} className="mb-8 h-auto w-56 object-contain sm:mb-10 sm:w-72" />
           {heroEyebrow && <p className="eyebrow">{heroEyebrow}</p>}
           <h1 className="mt-4 text-4xl leading-tight text-ink sm:text-5xl md:text-6xl">
             {heroTitle}

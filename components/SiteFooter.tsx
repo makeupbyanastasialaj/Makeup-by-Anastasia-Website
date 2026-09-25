@@ -17,13 +17,21 @@ export default function SiteFooter() {
   }, []);
 
   const businessName = settings?.businessName ?? "Makeup by Anastasia Laj";
+  const logo = settings?.logoImageUrl || settings?.logoDataUrl || "";
   const ig = settings?.instagram?.replace(/^@/, "");
 
   return (
     <footer className="mt-24 border-t border-sand/70 bg-cream-50">
       <div className="mx-auto grid max-w-6xl gap-8 px-4 py-12 sm:px-6 md:grid-cols-3">
         <div>
-          <BrandMark size="sm" href="/" />
+          {logo ? (
+            <Link href="/" aria-label={`${businessName} — home`}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={logo} alt={businessName} className="h-12 w-auto object-contain" />
+            </Link>
+          ) : (
+            <BrandMark size="sm" href="/" />
+          )}
           <p className="mt-4 max-w-xs text-sm leading-relaxed text-ink-soft">
             Bridal &amp; special-occasion makeup artistry. In-studio or travelling to you.
           </p>
