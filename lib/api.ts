@@ -119,8 +119,48 @@ export type Booking = {
 };
 
 // ─── Public ────────────────────────────────────────────────────────────────
+// The public bundle is needed by several components on every page (theme,
+// header, footer, page body). Fetch it once, de-duplicate concurrent calls,
+// keep a short in-memory cache, and mirror it to localStorage so returning
+// visitors can paint the correct content instantly instead of flashing defaults.
+const PUBLIC_CACHE_KEY = "mba_public_v1";
+let publicMem: { at: number; data: PublicBundle } | null = null;
+let publicInFlight: Promise<PublicBundle> | null = null;
+
+export function getCachedPublic(): PublicBundle | null {
+  if (publicMem) return publicMem.data;
+  try {
+    const raw = localStorage.getItem(PUBLIC_CACHE_KEY);
+    if (raw) return JSON.parse(raw) as PublicBundle;
+  } catch {
+    /* ignore */
+  }
+  return null;
+}
+
+function fetchPublic(): Promise<PublicBundle> {
+  if (publicMem && Date.now() - publicMem.at < 30_000) return Promise.resolve(publicMem.data);
+  if (publicInFlight) return publicInFlight;
+  publicInFlight = req<PublicBundle>("/public")
+    .then((d) => {
+      publicMem = { at: Date.now(), data: d };
+      try {
+        localStorage.setItem(PUBLIC_CACHE_KEY, JSON.stringify(d));
+      } catch {
+        /* ignore */
+      }
+      publicInFlight = null;
+      return d;
+    })
+    .catch((e) => {
+      publicInFlight = null;
+      throw e;
+    });
+  return publicInFlight;
+}
+
 export const api = {
-  getPublic: () => req<PublicBundle>("/public"),
+  getPublic: () => fetchPublic(),
   getAvailability: (serviceId: string, date: string) =>
     req<{ slots: Slot[] }>(`/availability?serviceId=${encodeURIComponent(serviceId)}&date=${date}`),
   createBooking: (input: unknown) =>

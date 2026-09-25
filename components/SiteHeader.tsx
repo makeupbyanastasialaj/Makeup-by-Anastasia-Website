@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { api } from "@/lib/api";
+import { api, getCachedPublic } from "@/lib/api";
 import BrandMark from "./BrandMark";
 
 export default function SiteHeader() {
@@ -10,13 +10,13 @@ export default function SiteHeader() {
   const [name, setName] = useState("Makeup by Anastasia Laj");
 
   useEffect(() => {
-    api
-      .getPublic()
-      .then((d) => {
-        setLogo(d.settings.logoImageUrl || d.settings.logoDataUrl || null);
-        setName(d.settings.businessName || "Makeup by Anastasia Laj");
-      })
-      .catch(() => {});
+    const apply = (s: { logoImageUrl: string; logoDataUrl: string; businessName: string }) => {
+      setLogo(s.logoImageUrl || s.logoDataUrl || null);
+      setName(s.businessName || "Makeup by Anastasia Laj");
+    };
+    const cached = getCachedPublic();
+    if (cached) apply(cached.settings);
+    api.getPublic().then((d) => apply(d.settings)).catch(() => {});
   }, []);
 
   return (

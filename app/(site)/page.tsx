@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { api, type PublicBundle } from "@/lib/api";
+import { api, getCachedPublic, type PublicBundle } from "@/lib/api";
 import { formatMoney } from "@/lib/money";
 import { formatDuration } from "@/lib/time";
 
@@ -10,7 +10,9 @@ export default function HomePage() {
   const [data, setData] = useState<PublicBundle | null>(null);
 
   useEffect(() => {
-    api.getPublic().then(setData).catch(() => setData(null));
+    const cached = getCachedPublic();
+    if (cached) setData(cached);
+    api.getPublic().then(setData).catch(() => {});
   }, []);
 
   const currency = data?.settings.currency ?? "GBP";

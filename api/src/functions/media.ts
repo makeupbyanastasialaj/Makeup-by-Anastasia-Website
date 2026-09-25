@@ -22,7 +22,8 @@ app.http("mediaGet", {
     return {
       status: 200,
       body: img.buffer,
-      headers: { "Content-Type": img.contentType, "Cache-Control": "public, max-age=300" },
+      // URLs are versioned (?v=timestamp) and change on re-upload, so cache hard.
+      headers: { "Content-Type": img.contentType, "Cache-Control": "public, max-age=31536000, immutable" },
     };
   },
 });

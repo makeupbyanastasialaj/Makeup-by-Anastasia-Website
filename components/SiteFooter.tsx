@@ -3,17 +3,16 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import BrandMark from "./BrandMark";
-import { api, type PublicSettings } from "@/lib/api";
+import { api, getCachedPublic, type PublicSettings } from "@/lib/api";
 
 export default function SiteFooter() {
   const [settings, setSettings] = useState<PublicSettings | null>(null);
   const year = new Date().getFullYear();
 
   useEffect(() => {
-    api
-      .getPublic()
-      .then((d) => setSettings(d.settings))
-      .catch(() => {});
+    const cached = getCachedPublic();
+    if (cached) setSettings(cached.settings);
+    api.getPublic().then((d) => setSettings(d.settings)).catch(() => {});
   }, []);
 
   const businessName = settings?.businessName ?? "Makeup by Anastasia Laj";
