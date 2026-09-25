@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import AdminNav from "./AdminNav";
+import BrandTheme from "@/components/BrandTheme";
 
 export default function PanelLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -36,6 +37,7 @@ export default function PanelLayout({ children }: { children: React.ReactNode })
 
   return (
     <div className="flex min-h-screen bg-cream">
+      <BrandTheme />
       <AdminNav businessName={businessName} />
       <div className="flex-1 lg:pl-64">
         <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6">{children}</main>

@@ -60,6 +60,7 @@ export type PublicSettings = {
   heroTitle: string;
   heroHighlight: string;
   heroSubtitle: string;
+  fontTheme: string;
 };
 export type PublicBundle = {
   settings: PublicSettings;

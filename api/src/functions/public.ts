@@ -29,6 +29,7 @@ function publicSettings(s: Awaited<ReturnType<typeof getSettings>>) {
     heroTitle: s.heroTitle,
     heroHighlight: s.heroHighlight,
     heroSubtitle: s.heroSubtitle,
+    fontTheme: s.fontTheme,
   };
 }
 

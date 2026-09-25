@@ -45,6 +45,7 @@ app.http("adminSettingsGet", {
         heroTitle: s.heroTitle,
         heroHighlight: s.heroHighlight,
         heroSubtitle: s.heroSubtitle,
+        fontTheme: s.fontTheme,
       },
     });
   },
@@ -95,6 +96,7 @@ app.http("adminSettingsSave", {
       heroTitle: text(s.heroTitle, 120, DEFAULT_SETTINGS.heroTitle),
       heroHighlight: text(s.heroHighlight, 120, DEFAULT_SETTINGS.heroHighlight),
       heroSubtitle: text(s.heroSubtitle, 400, DEFAULT_SETTINGS.heroSubtitle),
+      fontTheme: typeof s.fontTheme === "string" && /^[a-z]{1,20}$/.test(s.fontTheme) ? s.fontTheme : "classic",
     });
     return ok({ ok: true });
   },

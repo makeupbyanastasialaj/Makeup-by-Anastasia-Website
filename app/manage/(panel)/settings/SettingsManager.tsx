@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { parseMoneyToCents } from "@/lib/money";
 import { api, ApiError } from "@/lib/api";
+import { FONT_THEMES } from "@/lib/fonts";
 
 type Settings = {
   businessName: string;
@@ -26,6 +27,7 @@ type Settings = {
   heroTitle: string;
   heroHighlight: string;
   heroSubtitle: string;
+  fontTheme: string;
 };
 
 const CURRENCIES = ["GBP", "EUR", "USD", "AUD", "CAD", "NZD"];
@@ -124,6 +126,16 @@ export default function SettingsManager({ settings, stripeEnabled }: { settings:
           <ColorField label="Background" value={f.colorBackground} onChange={(v) => set("colorBackground", v)} />
           <ColorField label="Text" value={f.colorText} onChange={(v) => set("colorText", v)} />
           <ColorField label="Accent" value={f.colorAccent} onChange={(v) => set("colorAccent", v)} />
+        </div>
+
+        {/* Font */}
+        <div className="mb-6">
+          <Field label="Font style">
+            <select className="field" value={f.fontTheme || "classic"} onChange={(e) => set("fontTheme", e.target.value)}>
+              {FONT_THEMES.map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
+            </select>
+          </Field>
+          <p className="mt-1 text-xs text-ink-faint">Changes the headings and body text across your whole site.</p>
         </div>
 
         {/* Homepage wording */}
