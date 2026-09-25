@@ -34,7 +34,18 @@ function publicSettings(s: Awaited<ReturnType<typeof getSettings>>) {
     aboutImageUrl: s.aboutImageUrl,
     aboutTitle: s.aboutTitle,
     aboutText: s.aboutText,
+    bandText: s.bandText,
+    galleryImages: parseGalleryUrls(s.galleryUrls),
   };
+}
+
+function parseGalleryUrls(jsonStr: string): string[] {
+  try {
+    const a = JSON.parse(jsonStr || "[]");
+    return Array.isArray(a) ? a.filter((x) => typeof x === "string" && x) : [];
+  } catch {
+    return [];
+  }
 }
 
 // GET /api/public — everything the homepage & booking wizard need.

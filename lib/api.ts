@@ -65,6 +65,8 @@ export type PublicSettings = {
   aboutImageUrl: string;
   aboutTitle: string;
   aboutText: string;
+  bandText: string;
+  galleryImages: string[];
 };
 export type PublicBundle = {
   settings: PublicSettings;
@@ -172,6 +174,6 @@ export const api = {
     req<{ stripeEnabled: boolean; settings: Record<string, unknown> }>("/manage/settings"),
   saveSettings: (s: Record<string, unknown>) => post<{ ok: true }>("/manage/settings-save", s),
   changePassword: (body: { current: string; next: string }) => post<{ ok: true }>("/manage/password", body),
-  uploadImage: (kind: "logo" | "about", dataUrl: string) =>
-    post<{ url: string }>("/manage/upload", { kind, dataUrl }),
+  uploadImage: (kind: "logo" | "about" | "gallery", dataUrl: string, index?: number) =>
+    post<{ url: string }>("/manage/upload", { kind, dataUrl, index }),
 };

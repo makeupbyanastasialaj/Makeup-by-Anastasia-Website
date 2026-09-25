@@ -32,7 +32,11 @@ type Settings = {
   aboutImageUrl: string;
   aboutTitle: string;
   aboutText: string;
+  bandText: string;
+  galleryImages: string[];
 };
+
+const GALLERY_N = 6;
 
 const CURRENCIES = ["GBP", "EUR", "USD", "AUD", "CAD", "NZD"];
 const TIMEZONES = [
@@ -49,7 +53,8 @@ export default function SettingsManager({ settings, stripeEnabled }: { settings:
   const [saved, setSaved] = useState(false);
   const [logoErr, setLogoErr] = useState<string | null>(null);
   const [aboutErr, setAboutErr] = useState<string | null>(null);
-  const [uploading, setUploading] = useState<"" | "logo" | "about">("");
+  const [galleryErr, setGalleryErr] = useState<string | null>(null);
+  const [uploading, setUploading] = useState<string>("");
   const [pending, startTransition] = useTransition();
 
   function set<K extends keyof Settings>(key: K, value: Settings[K]) {
@@ -57,14 +62,32 @@ export default function SettingsManager({ settings, stripeEnabled }: { settings:
     setSaved(false);
   }
 
-  async function uploadFile(kind: "logo" | "about", file: File) {
-    const setErr = kind === "logo" ? setLogoErr : setAboutErr;
+  function errSetter(kind: "logo" | "about" | "gallery") {
+    return kind === "logo" ? setLogoErr : kind === "about" ? setAboutErr : setGalleryErr;
+  }
+
+  function applyUrl(kind: "logo" | "about" | "gallery", url: string, index?: number) {
+    if (kind === "logo") set("logoImageUrl", url);
+    else if (kind === "about") set("aboutImageUrl", url);
+    else {
+      setF((prev) => {
+        const arr = [...(prev.galleryImages || [])];
+        while (arr.length < GALLERY_N) arr.push("");
+        arr[index ?? 0] = url;
+        return { ...prev, galleryImages: arr };
+      });
+      setSaved(false);
+    }
+  }
+
+  async function uploadImg(kind: "logo" | "about" | "gallery", file: File, index?: number) {
+    const setErr = errSetter(kind);
     setErr(null);
-    setUploading(kind);
+    setUploading(kind === "gallery" ? `gallery${index}` : kind);
     try {
       const dataUrl = await resizeImage(file, kind === "logo" ? 900 : 1200);
-      const { url } = await api.uploadImage(kind, dataUrl);
-      set(kind === "logo" ? "logoImageUrl" : "aboutImageUrl", url);
+      const { url } = await api.uploadImage(kind, dataUrl, index);
+      applyUrl(kind, url, index);
     } catch {
       setErr("Couldn't upload that image — please try a different PNG or JPG.");
     } finally {
@@ -72,12 +95,12 @@ export default function SettingsManager({ settings, stripeEnabled }: { settings:
     }
   }
 
-  async function removeImage(kind: "logo" | "about") {
-    const setErr = kind === "logo" ? setLogoErr : setAboutErr;
+  async function removeImg(kind: "logo" | "about" | "gallery", index?: number) {
+    const setErr = errSetter(kind);
     setErr(null);
     try {
-      await api.uploadImage(kind, "");
-      set(kind === "logo" ? "logoImageUrl" : "aboutImageUrl", "");
+      await api.uploadImage(kind, "", index);
+      applyUrl(kind, "", index);
     } catch {
       setErr("Couldn't remove the image. Please try again.");
     }
@@ -132,12 +155,12 @@ export default function SettingsManager({ settings, stripeEnabled }: { settings:
                 type="file"
                 accept="image/png,image/jpeg,image/webp"
                 disabled={uploading === "logo"}
-                onChange={(e) => { const file = e.target.files?.[0]; if (file) uploadFile("logo", file); e.target.value = ""; }}
+                onChange={(e) => { const file = e.target.files?.[0]; if (file) uploadImg("logo", file); e.target.value = ""; }}
                 className="text-sm text-ink-soft file:mr-3 file:rounded-full file:border file:border-sand file:bg-cream-100 file:px-4 file:py-2 file:text-xs file:font-semibold file:uppercase file:tracking-wide file:text-ink-soft"
               />
               {uploading === "logo" && <span className="text-xs text-ink-faint">Uploading…</span>}
               {(f.logoImageUrl || f.logoDataUrl) && uploading !== "logo" && (
-                <button type="button" onClick={() => removeImage("logo")} className="self-start text-xs text-red-700 underline">Remove logo</button>
+                <button type="button" onClick={() => removeImg("logo")} className="self-start text-xs text-red-700 underline">Remove logo</button>
               )}
             </div>
           </div>
@@ -169,6 +192,7 @@ export default function SettingsManager({ settings, stripeEnabled }: { settings:
           <Field label="Headline"><input className="field" value={f.heroTitle} onChange={(e) => set("heroTitle", e.target.value)} /></Field>
           <Field label="Script line (under the headline)"><input className="field" value={f.heroHighlight} onChange={(e) => set("heroHighlight", e.target.value)} /></Field>
           <Field label="Intro paragraph" full><textarea className="field min-h-[5rem]" rows={3} value={f.heroSubtitle} onChange={(e) => set("heroSubtitle", e.target.value)} /></Field>
+          <Field label="Middle banner line (coloured strip)" full><input className="field" value={f.bandText} onChange={(e) => set("bandText", e.target.value)} placeholder="One elegant line shown mid-page in your accent colour. Leave empty to hide." /></Field>
         </div>
       </section>
 
@@ -192,12 +216,12 @@ export default function SettingsManager({ settings, stripeEnabled }: { settings:
                 type="file"
                 accept="image/png,image/jpeg,image/webp"
                 disabled={uploading === "about"}
-                onChange={(e) => { const file = e.target.files?.[0]; if (file) uploadFile("about", file); e.target.value = ""; }}
+                onChange={(e) => { const file = e.target.files?.[0]; if (file) uploadImg("about", file); e.target.value = ""; }}
                 className="text-sm text-ink-soft file:mr-3 file:rounded-full file:border file:border-sand file:bg-cream-100 file:px-4 file:py-2 file:text-xs file:font-semibold file:uppercase file:tracking-wide file:text-ink-soft"
               />
               {uploading === "about" && <span className="text-xs text-ink-faint">Uploading…</span>}
               {f.aboutImageUrl && uploading !== "about" && (
-                <button type="button" onClick={() => removeImage("about")} className="self-start text-xs text-red-700 underline">Remove photo</button>
+                <button type="button" onClick={() => removeImg("about")} className="self-start text-xs text-red-700 underline">Remove photo</button>
               )}
             </div>
           </div>
@@ -209,6 +233,39 @@ export default function SettingsManager({ settings, stripeEnabled }: { settings:
           <Field label="Heading"><input className="field" value={f.aboutTitle} onChange={(e) => set("aboutTitle", e.target.value)} placeholder="e.g. Meet Anastasia" /></Field>
           <Field label="About text"><textarea className="field min-h-[8rem]" rows={7} value={f.aboutText} onChange={(e) => set("aboutText", e.target.value)} placeholder="Tell your clients about yourself and your work. Leave a blank line between paragraphs." /></Field>
         </div>
+      </section>
+
+      <section className="card p-5">
+        <h2 className="mb-1 text-xl text-ink">Instagram showcase</h2>
+        <p className="mb-4 text-sm text-ink-soft">Upload up to {GALLERY_N} favourite photos — shown in a grid above the footer. They link to your Instagram (set your handle under Business details above).</p>
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+          {Array.from({ length: GALLERY_N }).map((_, i) => {
+            const url = f.galleryImages?.[i] || "";
+            const busy = uploading === `gallery${i}`;
+            return (
+              <div key={i} className="flex flex-col gap-2">
+                <div className="aspect-square w-full overflow-hidden rounded-lg border border-sand bg-white">
+                  {url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={url} alt={`Gallery ${i + 1}`} className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-[0.65rem] text-ink-faint">Empty</div>
+                  )}
+                </div>
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  disabled={busy}
+                  onChange={(e) => { const file = e.target.files?.[0]; if (file) uploadImg("gallery", file, i); e.target.value = ""; }}
+                  className="text-xs text-ink-soft file:mr-2 file:rounded-full file:border file:border-sand file:bg-cream-100 file:px-3 file:py-1.5 file:text-[0.65rem] file:font-semibold file:uppercase file:tracking-wide file:text-ink-soft"
+                />
+                {busy && <span className="text-xs text-ink-faint">Uploading…</span>}
+                {url && !busy && <button type="button" onClick={() => removeImg("gallery", i)} className="self-start text-xs text-red-700 underline">Remove</button>}
+              </div>
+            );
+          })}
+        </div>
+        {galleryErr && <p className="mt-2 text-xs text-red-700">{galleryErr}</p>}
       </section>
 
       <section className="card p-5">

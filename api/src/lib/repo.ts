@@ -31,6 +31,8 @@ export interface Settings {
   aboutImageUrl: string; // served path to the about photo blob, or ""
   aboutTitle: string;
   aboutText: string;
+  bandText: string; // single line shown in the coloured mid-page band ("" hides it)
+  galleryUrls: string; // JSON array of served image paths for the Instagram showcase
   adminPasswordHash: string;
   totpSecret: string;
   totpEnabled: boolean;
@@ -144,6 +146,8 @@ export const DEFAULT_SETTINGS: Settings = {
   aboutImageUrl: "",
   aboutTitle: "About me",
   aboutText: "",
+  bandText: "Timeless, camera-ready makeup — thoughtfully designed around you.",
+  galleryUrls: "[]",
   adminPasswordHash: "",
   totpSecret: "",
   totpEnabled: false,

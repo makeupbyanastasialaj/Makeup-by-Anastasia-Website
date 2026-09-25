@@ -1,14 +1,13 @@
 import { app, HttpRequest } from "@azure/functions";
 import { putImage, deleteImage, getImage } from "../lib/blob";
-import { updateSettings } from "../lib/repo";
+import { getSettings, updateSettings } from "../lib/repo";
 import { ok, badRequest, unauthorized, isAdmin, parseBody, json } from "../lib/http";
 
-const KEYS = ["logo", "about"] as const;
-type Key = (typeof KEYS)[number];
-const URL_FIELD: Record<Key, "logoImageUrl" | "aboutImageUrl"> = {
-  logo: "logoImageUrl",
-  about: "aboutImageUrl",
-};
+export const GALLERY_N = 6;
+
+function isServeKey(k: string): boolean {
+  return k === "logo" || k === "about" || /^gallery[0-5]$/.test(k);
+}
 
 // GET /api/media/{key} — serve a brand image (public).
 app.http("mediaGet", {
@@ -17,7 +16,7 @@ app.http("mediaGet", {
   route: "media/{key}",
   handler: async (request: HttpRequest) => {
     const key = request.params.key;
-    if (!KEYS.includes(key as Key)) return { status: 404 };
+    if (!isServeKey(key)) return { status: 404 };
     const img = await getImage(key);
     if (!img) return { status: 404 };
     return {
@@ -28,36 +27,65 @@ app.http("mediaGet", {
   },
 });
 
-// POST /api/manage/upload  { kind, dataUrl }  — upload or (empty dataUrl) remove.
+// POST /api/manage/upload  { kind, index?, dataUrl }  — upload or (empty dataUrl) remove.
 app.http("mediaUpload", {
   methods: ["POST"],
   authLevel: "anonymous",
   route: "manage/upload",
   handler: async (request: HttpRequest) => {
     if (!(await isAdmin(request))) return unauthorized();
-    const { kind, dataUrl } = await parseBody<{ kind?: string; dataUrl?: string }>(request);
-    if (!kind || !KEYS.includes(kind as Key)) return badRequest("Unknown image type.");
-    const field = URL_FIELD[kind as Key];
+    const { kind, index, dataUrl } = await parseBody<{ kind?: string; index?: number; dataUrl?: string }>(request);
     const raw = typeof dataUrl === "string" ? dataUrl : "";
 
+    if (raw !== "") {
+      if (!/^data:image\/(png|jpeg|webp|gif);base64,/.test(raw)) {
+        return badRequest("Unsupported image format. Please use a PNG, JPG or WebP.");
+      }
+      if (raw.length > 1_500_000) {
+        return badRequest("That image is too large. Please use a smaller one.");
+      }
+    }
+
+    // Determine the blob key + how to record the resulting URL in settings.
+    let blobKey: string;
+    let record: (url: string) => Promise<void>;
+
+    if (kind === "logo" || kind === "about") {
+      blobKey = kind;
+      const field = kind === "logo" ? "logoImageUrl" : "aboutImageUrl";
+      record = (url) => updateSettings({ [field]: url });
+    } else if (kind === "gallery") {
+      const idx = Number(index);
+      if (!Number.isInteger(idx) || idx < 0 || idx >= GALLERY_N) return badRequest("Invalid gallery slot.");
+      blobKey = `gallery${idx}`;
+      record = async (url) => {
+        const s = await getSettings();
+        let arr: string[] = [];
+        try {
+          arr = JSON.parse(s.galleryUrls || "[]");
+        } catch {
+          arr = [];
+        }
+        while (arr.length < GALLERY_N) arr.push("");
+        arr[idx] = url;
+        await updateSettings({ galleryUrls: JSON.stringify(arr) });
+      };
+    } else {
+      return badRequest("Unknown image type.");
+    }
+
     if (raw === "") {
-      await deleteImage(kind);
-      await updateSettings({ [field]: "" });
+      await deleteImage(blobKey);
+      await record("");
       return ok({ url: "" });
     }
-    if (!/^data:image\/(png|jpeg|webp|gif);base64,/.test(raw)) {
-      return badRequest("Unsupported image format. Please use a PNG, JPG or WebP.");
-    }
-    if (raw.length > 1_500_000) {
-      return badRequest("That image is too large. Please use a smaller one.");
-    }
     try {
-      await putImage(kind, raw);
+      await putImage(blobKey, raw);
     } catch {
       return json(500, { error: "Couldn't store the image. Please try again." });
     }
-    const url = `/api/media/${kind}?v=${Date.now()}`;
-    await updateSettings({ [field]: url });
+    const url = `/api/media/${blobKey}?v=${Date.now()}`;
+    await record(url);
     return ok({ url });
   },
 });

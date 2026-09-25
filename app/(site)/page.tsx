@@ -34,6 +34,10 @@ export default function HomePage() {
   const aboutParas = aboutText.split(/\n\s*\n/).map((t) => t.trim()).filter(Boolean);
   const showAbout = aboutParas.length > 0 || !!aboutImageUrl;
 
+  const bandText = s?.bandText ?? "";
+  const galleryImages = s?.galleryImages ?? [];
+  const igHandle = (s?.instagram || "").replace(/^@/, "");
+
   return (
     <>
       {/* Hero */}
@@ -121,6 +125,20 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Colour band */}
+      {bandText && (
+        <section className="bg-taupe-dark">
+          <div className="mx-auto max-w-4xl px-4 py-16 text-center sm:px-6 sm:py-20">
+            <p
+              className="text-2xl leading-snug text-white sm:text-3xl md:text-4xl"
+              style={{ fontFamily: "var(--font-cormorant), ui-serif, Georgia, serif" }}
+            >
+              {bandText}
+            </p>
+          </div>
+        </section>
+      )}
+
       {/* Services */}
       <section id="services" className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
         <div className="mb-12 text-center">
@@ -196,6 +214,48 @@ export default function HomePage() {
         </p>
         <Link href="/book" className="btn btn-primary mt-8">Book your appointment</Link>
       </section>
+
+      {/* Instagram showcase */}
+      {galleryImages.length > 0 && (
+        <section id="instagram" className="border-t border-sand/60 bg-cream-50">
+          <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
+            <div className="mb-8 text-center">
+              <h2 className="text-3xl text-ink sm:text-4xl">Connect on Instagram</h2>
+              {igHandle && (
+                <a
+                  href={`https://instagram.com/${igHandle}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-2 inline-block text-sm tracking-wide text-taupe-dark hover:text-ink"
+                >
+                  @{igHandle}
+                </a>
+              )}
+            </div>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
+              {galleryImages.map((src, i) =>
+                igHandle ? (
+                  <a
+                    key={i}
+                    href={`https://instagram.com/${igHandle}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block overflow-hidden rounded-xl"
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={src} alt={`Makeup look ${i + 1}`} className="aspect-square w-full object-cover transition-transform duration-300 hover:scale-105" />
+                  </a>
+                ) : (
+                  <div key={i} className="overflow-hidden rounded-xl">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={src} alt={`Makeup look ${i + 1}`} className="aspect-square w-full object-cover" />
+                  </div>
+                ),
+              )}
+            </div>
+          </div>
+        </section>
+      )}
     </>
   );
 }

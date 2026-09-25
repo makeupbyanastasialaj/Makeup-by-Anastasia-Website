@@ -12,6 +12,14 @@ function text(v: unknown, max: number, fallback: string): string {
   const t = typeof v === "string" ? v.trim() : "";
   return t ? t.slice(0, max) : fallback;
 }
+function parseGallery(json: string): string[] {
+  try {
+    const a = JSON.parse(json || "[]");
+    return Array.isArray(a) ? a.map((x) => (typeof x === "string" ? x : "")) : [];
+  } catch {
+    return [];
+  }
+}
 
 // GET /api/manage/settings — editable settings (never returns password/secret).
 app.http("adminSettingsGet", {
@@ -50,6 +58,8 @@ app.http("adminSettingsGet", {
         aboutImageUrl: s.aboutImageUrl,
         aboutTitle: s.aboutTitle,
         aboutText: s.aboutText,
+        bandText: s.bandText,
+        galleryImages: parseGallery(s.galleryUrls),
       },
     });
   },
@@ -103,6 +113,7 @@ app.http("adminSettingsSave", {
       fontTheme: typeof s.fontTheme === "string" && /^[a-z]{1,20}$/.test(s.fontTheme) ? s.fontTheme : "classic",
       aboutTitle: text(s.aboutTitle, 80, DEFAULT_SETTINGS.aboutTitle),
       aboutText: text(s.aboutText, 1500, ""),
+      bandText: typeof s.bandText === "string" ? s.bandText.trim().slice(0, 200) : DEFAULT_SETTINGS.bandText,
     });
     return ok({ ok: true });
   },
