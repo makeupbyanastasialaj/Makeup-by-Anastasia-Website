@@ -85,11 +85,14 @@ export default function SettingsManager({ settings, stripeEnabled }: { settings:
     setErr(null);
     setUploading(kind === "gallery" ? `gallery${index}` : kind);
     try {
-      const dataUrl = await resizeImage(file, kind === "logo" ? 900 : 1200);
+      // Keep uploads modest so they stay well under the API request-size limit.
+      const maxW = kind === "logo" ? 800 : kind === "about" ? 900 : 700;
+      const maxChars = kind === "gallery" ? 250_000 : 350_000;
+      const dataUrl = await resizeImage(file, maxW, maxChars);
       const { url } = await api.uploadImage(kind, dataUrl, index);
       applyUrl(kind, url, index);
-    } catch {
-      setErr("Couldn't upload that image — please try a different PNG or JPG.");
+    } catch (e) {
+      setErr(e instanceof ApiError ? e.message : "Couldn't process that image — it may be too large. Try a smaller photo (JPG or PNG).");
     } finally {
       setUploading("");
     }
@@ -388,8 +391,8 @@ function ColorField({ label, value, onChange }: { label: string; value: string; 
  * storage. Scales down to at most `maxWidth` px wide (never upscales) and keeps
  * quality high; only steps quality/size down if needed to stay under the cap.
  */
-function resizeImage(file: File, maxWidth: number): Promise<string> {
-  const MAX_CHARS = 1_400_000; // ~1 MB, comfortably under the upload limit
+function resizeImage(file: File, maxWidth: number, maxChars = 400_000): Promise<string> {
+  const MAX_CHARS = maxChars;
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onerror = () => reject(new Error("read failed"));

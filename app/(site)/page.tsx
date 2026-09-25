@@ -21,12 +21,14 @@ export default function HomePage() {
   const s = data?.settings;
   const businessName = s?.businessName || "Makeup by Anastasia Laj";
   const logoUrl = s?.logoImageUrl || s?.logoDataUrl || "/logo.png";
-  const heroEyebrow = s?.heroEyebrow || "Bridal & Occasion Makeup Artistry";
-  const heroTitle = s?.heroTitle || "Effortless elegance,";
-  const heroHighlight = s?.heroHighlight || "beautifully you";
-  const heroSubtitle =
-    s?.heroSubtitle ||
-    "Timeless, long-wearing makeup for weddings, events and every occasion worth remembering — in my studio, or travelling to you.";
+  // Once settings load, respect empty values (so cleared fields truly disappear);
+  // show the defaults only while still loading.
+  const heroEyebrow = s ? s.heroEyebrow : "Bridal & Occasion Makeup Artistry";
+  const heroTitle = s ? s.heroTitle : "Effortless elegance,";
+  const heroHighlight = s ? s.heroHighlight : "beautifully you";
+  const heroSubtitle = s
+    ? s.heroSubtitle
+    : "Timeless, long-wearing makeup for weddings, events and every occasion worth remembering — in my studio, or travelling to you.";
 
   const aboutTitle = s?.aboutTitle || "About me";
   const aboutText = s?.aboutText || "";
@@ -46,15 +48,17 @@ export default function HomePage() {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={logoUrl} alt={businessName} width={340} height={340} className="mb-8 h-auto w-56 object-contain sm:mb-10 sm:w-72" />
           {heroEyebrow && <p className="eyebrow">{heroEyebrow}</p>}
-          <h1 className="mt-4 text-4xl leading-tight text-ink sm:text-5xl md:text-6xl">
-            {heroTitle}
-            {heroHighlight && (
-              <>
-                <br />
-                <span className="script text-taupe-dark">{heroHighlight}</span>
-              </>
-            )}
-          </h1>
+          {(heroTitle || heroHighlight) && (
+            <h1 className="mt-4 text-4xl leading-tight text-ink sm:text-5xl md:text-6xl">
+              {heroTitle}
+              {heroHighlight && (
+                <>
+                  {heroTitle && <br />}
+                  <span className="script text-taupe-dark">{heroHighlight}</span>
+                </>
+              )}
+            </h1>
+          )}
           {heroSubtitle && (
             <p className="mt-5 max-w-xl text-base leading-relaxed text-ink-soft">{heroSubtitle}</p>
           )}

@@ -12,6 +12,10 @@ function text(v: unknown, max: number, fallback: string): string {
   const t = typeof v === "string" ? v.trim() : "";
   return t ? t.slice(0, max) : fallback;
 }
+// Like text(), but an empty value stays empty (no default) so fields can be cleared.
+function strOpt(v: unknown, max: number): string {
+  return typeof v === "string" ? v.trim().slice(0, max) : "";
+}
 function parseGallery(json: string): string[] {
   try {
     const a = JSON.parse(json || "[]");
@@ -106,10 +110,10 @@ app.http("adminSettingsSave", {
       colorBackground: hex(s.colorBackground, DEFAULT_SETTINGS.colorBackground),
       colorText: hex(s.colorText, DEFAULT_SETTINGS.colorText),
       colorAccent: hex(s.colorAccent, DEFAULT_SETTINGS.colorAccent),
-      heroEyebrow: text(s.heroEyebrow, 80, DEFAULT_SETTINGS.heroEyebrow),
-      heroTitle: text(s.heroTitle, 120, DEFAULT_SETTINGS.heroTitle),
-      heroHighlight: text(s.heroHighlight, 120, DEFAULT_SETTINGS.heroHighlight),
-      heroSubtitle: text(s.heroSubtitle, 400, DEFAULT_SETTINGS.heroSubtitle),
+      heroEyebrow: strOpt(s.heroEyebrow, 80),
+      heroTitle: strOpt(s.heroTitle, 120),
+      heroHighlight: strOpt(s.heroHighlight, 120),
+      heroSubtitle: strOpt(s.heroSubtitle, 400),
       fontTheme: typeof s.fontTheme === "string" && /^[a-z]{1,20}$/.test(s.fontTheme) ? s.fontTheme : "classic",
       aboutTitle: text(s.aboutTitle, 80, DEFAULT_SETTINGS.aboutTitle),
       aboutText: text(s.aboutText, 1500, ""),
